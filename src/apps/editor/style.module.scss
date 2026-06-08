@@ -32,7 +32,7 @@ $bar: #26282c;
     background: transparent;
     border: none;
     border-radius: 6px;
-    color: $muted;
+    color: #FFFFFF;
     cursor: pointer;
     font-size: 18px;
 
@@ -43,22 +43,27 @@ $bar: #26282c;
 }
 
 .active {
-    color: $accent;
+    background: #3871E1;
 }
 
 .panels {
     flex: 1;
+    padding: 8px;
 }
 
 .sidebar {
     background: $surface;
-    padding: 12px;
+    padding: 6px;
+    height: 100%;
+    border-radius: 8px;
     overflow: auto;
 }
 
 .main {
     background: $surface;
+    height: 100%;
     padding: 12px;
+    border-radius: 8px;
     overflow: auto;
 }
 
@@ -70,11 +75,13 @@ $bar: #26282c;
 }
 
 .handle {
-    width: 4px;
+    width: 8px;
     background: transparent;
+    flex-shrink: 0;
 
     &:hover {
         background: $focus;
+        border-radius: 4px;
     }
 }
 
@@ -96,4 +103,51 @@ $bar: #26282c;
     color: $muted;
     font-size: 13px;
     margin: 0;
+}
+
+.treeRow {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 22px;
+    padding-right: 8px;
+    border-radius: 4px;
+    color: #d4d4d4;
+    font-size: 13px;
+    line-height: 22px;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+        background: #2a2d32;
+    }
+}
+
+.chevron {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: $muted;
+    transition: transform 0.12s ease;
+}
+
+.chevronOpen {
+    transform: rotate(90deg);
+}
+
+.chevronSpacer {
+    flex-shrink: 0;
+    width: 16px;
+}
+
+.nodeIcon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.nodeName {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

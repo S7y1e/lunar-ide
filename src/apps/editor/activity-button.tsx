@@ -8,7 +8,7 @@ type Props = {
     onClick: () => void;
 };
 
-export default function SidebarButton({ label, icon: Icon, active, onClick }: Props) {
+export default function ActivityButton({ label, icon: Icon, active, onClick }: Props) {
     return (
         <button
             className={`${styles.activityButton} ${active ? styles.active : ""}`}

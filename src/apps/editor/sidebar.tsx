@@ -1,16 +1,29 @@
-import styles from "./style.module.scss";
-import SidebarButton from "./sidebar-button";
-import { FaRegFolder } from "react-icons/fa";
+import style from "./style.module.scss"
+import FileTreeNode from "./file-tree-node";
+import { ActivityViewId } from "./activity-views";
+import {useEffect, useState} from "react";
+import {FileNode, readDirectory} from "../../lib/filesystem";
 
-export default function Sidebar() {
+type Props = {
+    currentWindow: ActivityViewId | null;
+    path: string;
+};
+
+export default function Sidebar({ currentWindow, path }: Props) {
+    const [nodes, setNodes] = useState<FileNode[]>([]);
+
+    useEffect(() => {
+        readDirectory(path).then(setNodes);
+    }, [path]);
+
+    if (!currentWindow) return null;
+
     return (
-        <div className={styles.activityBar}>
-            <SidebarButton
-                icon={FaRegFolder}
-                label="Project"
-                active={false}
-                onClick={() => {}}
-            />
+        <div className={style.sidebar}>
+            {currentWindow === "project" &&
+                nodes.map((node) => (
+                    <FileTreeNode key={node.path} node={node} />
+                ))}
         </div>
     );
 }
