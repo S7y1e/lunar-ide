@@ -1,0 +1,127 @@
+$accent: #6cb5ff;
+$muted: #888;
+$focus: #007bff;
+$surface: #2a2d31;
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    width: 100vw;
+    padding-top: 40px;
+    padding-bottom: 10px;
+    gap: 8px;
+    color: $accent;
+}
+
+.title {
+    font-size: 24px;
+    margin: 0;
+}
+
+.subtitle {
+    color: $muted;
+    margin: 0 0 30px 0;
+}
+
+.cards {
+    display: flex;
+    gap: 16px;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 240px;
+    padding: 20px;
+    background: $surface;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.2s;
+
+    &:hover {
+        border-color: $focus;
+    }
+}
+
+.cardTitle {
+    color: $accent;
+    font-size: 15px;
+}
+
+.cardDesc {
+    color: $muted;
+    font-size: 13px;
+}
+
+.recent {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 496px;
+    margin-top: 24px;
+}
+
+.recentHeading {
+    color: #e8e8e8;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.recentList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: #1f2125;
+    border-radius: 10px;
+}
+
+.recentButton {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 14px;
+    text-align: left;
+    background: $surface;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+
+    &:hover {
+        border-color: $focus;
+    }
+}
+
+.recentInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.removeButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: $muted;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+
+    &:hover {
+        color: #fff;
+    }
+}

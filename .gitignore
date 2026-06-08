@@ -1,0 +1,19 @@
+/node_modules
+/.pnp
+.pnp.js
+
+/tmp
+/out-tsc
+/dist
+src-tauri/target/
+.DS_Store
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.idea/
+.vscode/*
+
+Explanation.md
