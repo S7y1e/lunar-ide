@@ -3,9 +3,12 @@ body,
 #root {
     height: 100%;
     margin: 0;
+    padding: 0;
+    overflow: hidden;
     background: #191a1c;
     font-family: Inter, monospace;
 }
+
 * {
     box-sizing: border-box;
 }

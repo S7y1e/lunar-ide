@@ -1,18 +1,18 @@
+import { useState } from "react";
+import { Group, Panel, Separator, usePanelRef } from "react-resizable-panels";
 import styles from "./style.module.scss";
+import Sidebar from "./sidebar";
 
 type Props = {
     path: string;
-    onBack: () => void;
 };
 
-export default function Editor({ path, onBack }: Props) {
+export default function Editor({ path }: Props) {
+    const [explorer, setExplorer] = useState<boolean>(true);
+
     return (
         <div className={styles.editor}>
-            <button className={styles.backButton} onClick={onBack}>
-                ← Back
-            </button>
-            <h1 className={styles.title}>Editor</h1>
-            <p className={styles.path}>{path}</p>
+            <Sidebar></Sidebar>
         </div>
-    );
+    )
 }

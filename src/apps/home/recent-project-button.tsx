@@ -7,18 +7,27 @@ type Props = {
     onRemove: (path: string) => void;
 };
 
-export default function RecentProjectButton({ name, path, onOpen, onRemove }: Props) {
+export default function RecentProjectButton({
+    name,
+    path,
+    onOpen,
+    onRemove,
+}: Props) {
     return (
         <button className={styles.recentButton} onClick={() => onOpen(path)}>
             <span className={styles.recentInfo}>
                 <span className={styles.cardTitle}>{name}</span>
                 <span className={styles.cardDesc}>{path}</span>
             </span>
-            <span className={styles.removeButton} onClick={(e) => {
+            <span
+                className={styles.removeButton}
+                onClick={(e) => {
                     e.stopPropagation();
                     onRemove(path);
                 }}
-            >×</span>
+            >
+                ×
+            </span>
         </button>
     );
 }

@@ -1,39 +1,99 @@
 $accent: #6cb5ff;
 $muted: #888;
 $focus: #007bff;
+$surface: #1f2125;
+$bar: #26282c;
 
 .editor {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  width: 100vw;
-  padding: 20px;
-  gap: 12px;
-  color: $accent;
+    display: flex;
+    height: calc(100vh - 36px);
+    width: 100%;
+    background: $bar;
+    color: $accent;
 }
 
-.backButton {
-  align-self: flex-start;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  color: $muted;
-  cursor: pointer;
-  padding: 6px 12px;
-  transition: border-color 0.2s;
+.activityBar {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+    width: 40px;
+    padding: 8px 0;
+    background: $bar;
+}
 
-  &:hover {
-    border-color: $focus;
-  }
+.activityButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: $muted;
+    cursor: pointer;
+    font-size: 18px;
+
+    &:hover {
+        background: #34373c;
+        color: #fff;
+    }
+}
+
+.active {
+    color: $accent;
+}
+
+.panels {
+    flex: 1;
+}
+
+.sidebar {
+    background: $surface;
+    padding: 12px;
+    overflow: auto;
+}
+
+.main {
+    background: $surface;
+    padding: 12px;
+    overflow: auto;
+}
+
+.terminal {
+    background: $surface;
+    padding: 12px;
+    overflow: auto;
+    color: $muted;
+}
+
+.handle {
+    width: 4px;
+    background: transparent;
+
+    &:hover {
+        background: $focus;
+    }
+}
+
+.handleHorizontal {
+    height: 4px;
+    background: transparent;
+
+    &:hover {
+        background: $focus;
+    }
 }
 
 .title {
-  font-size: 24px;
-  margin: 0;
+    font-size: 24px;
+    margin: 0;
 }
 
 .path {
-  color: $muted;
-  font-size: 13px;
-  margin: 0;
+    color: $muted;
+    font-size: 13px;
+    margin: 0;
 }
