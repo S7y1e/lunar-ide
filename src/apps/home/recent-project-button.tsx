@@ -1,16 +1,24 @@
 import styles from "./style.module.scss";
-import React from "react";
 
-type Props = { name: string; path: string; onRemove: (path: string) => void };
+type Props = {
+    name: string;
+    path: string;
+    onOpen: (path: string) => void;
+    onRemove: (path: string) => void;
+};
 
-export default function RecentProjectButton({ name, path, onRemove}: Props) {
+export default function RecentProjectButton({ name, path, onOpen, onRemove }: Props) {
     return (
-        <button className={styles.recentButton}>
+        <button className={styles.recentButton} onClick={() => onOpen(path)}>
             <span className={styles.recentInfo}>
                 <span className={styles.cardTitle}>{name}</span>
                 <span className={styles.cardDesc}>{path}</span>
             </span>
-            <span className={styles.removeButton} onClick={() => onRemove(path)}>×</span>
+            <span className={styles.removeButton} onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove(path);
+                }}
+            >×</span>
         </button>
     );
 }

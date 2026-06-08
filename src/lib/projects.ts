@@ -61,7 +61,7 @@ export async function removeRecentProjectFromList(path: string) {
     await saveRecentProjects(filteredArray);
 }
 
-export async function selectFolder(): Promise<boolean> {
+export async function selectFolder(): Promise<string | null> {
     const path = await open({
         multiple: false,
         directory: true,
@@ -69,7 +69,7 @@ export async function selectFolder(): Promise<boolean> {
 
     if (path) {
         await updateRecentProjects(path);
-        return true;
+        return path;
     }
-    return false;
+    return null;
 }

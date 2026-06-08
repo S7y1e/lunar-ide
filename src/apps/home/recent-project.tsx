@@ -5,10 +5,11 @@ import React from "react";
 
 type Props = {
     projects: RecentProject[];
+    onOpen: (path: string) => void;
     onRemove: (path: string) => void;
 };
 
-export default function RecentProjects({ projects, onRemove }: Props) {
+export default function RecentProjects({ projects, onOpen, onRemove }: Props) {
     return (
         <div className={styles.recent}>
             <p className={styles.recentHeading}>Recent Projects</p>
@@ -19,6 +20,7 @@ export default function RecentProjects({ projects, onRemove }: Props) {
                         key={project.path}
                         name={project.name}
                         path={project.path}
+                        onOpen={onOpen}
                         onRemove={onRemove}
                     />
                 ))}

@@ -1,0 +1,39 @@
+$accent: #6cb5ff;
+$muted: #888;
+$focus: #007bff;
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  padding: 20px;
+  gap: 12px;
+  color: $accent;
+}
+
+.backButton {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: $muted;
+  cursor: pointer;
+  padding: 6px 12px;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: $focus;
+  }
+}
+
+.title {
+  font-size: 24px;
+  margin: 0;
+}
+
+.path {
+  color: $muted;
+  font-size: 13px;
+  margin: 0;
+}
