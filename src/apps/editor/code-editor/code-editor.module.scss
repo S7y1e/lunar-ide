@@ -32,6 +32,7 @@
     font-size: 13px;
     white-space: nowrap;
     cursor: pointer;
+    user-select: none;
     border-bottom: 2px solid transparent;
     transform: rotateX(180deg);
 }
@@ -40,6 +41,10 @@
     background: $hover;
     color: $text;
     border-bottom-color: $accent;
+}
+
+.editorTabDragging {
+    opacity: 0.5;
 }
 
 .editorTabName {

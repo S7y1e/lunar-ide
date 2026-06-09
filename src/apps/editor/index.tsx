@@ -29,6 +29,15 @@ export default function Editor({ path }: Props) {
         setActiveFile(filePath);
     };
 
+    const reorderFiles = (from: number, to: number) => {
+        setOpenFiles((prev) => {
+            const next = [...prev];
+            const [moved] = next.splice(from, 1);
+            next.splice(to, 0, moved);
+            return next;
+        });
+    };
+
     const closeFile = (filePath: string) => {
         const idx = openFiles.indexOf(filePath);
         const remaining = openFiles.filter((p) => p !== filePath);
@@ -87,6 +96,7 @@ export default function Editor({ path }: Props) {
                         active={activeFile}
                         onSelect={setActiveFile}
                         onClose={closeFile}
+                        onReorder={reorderFiles}
                     />
                     <div className={styles.editorArea}>
                         <EditorPane path={activeFile} />
