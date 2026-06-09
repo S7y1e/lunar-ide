@@ -78,8 +78,8 @@ export default function Editor({ path }: Props) {
                     panelRef={sidebarRef}
                     collapsible
                     collapsedSize={0}
-                    defaultSize={22}
-                    minSize={12}
+                    defaultSize="260px"
+                    minSize="180px"
                 >
                     <Sidebar
                         currentWindow={currentWindow}
