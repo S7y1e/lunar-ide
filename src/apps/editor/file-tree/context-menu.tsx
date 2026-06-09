@@ -1,4 +1,4 @@
-import styles from "./style.module.scss";
+import styles from "./file-tree.module.scss";
 
 export type MenuItem = {
     label: string;

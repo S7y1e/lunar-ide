@@ -1,0 +1,82 @@
+@use "../styles/vars" as *;
+
+.editorTabs {
+    display: flex;
+    flex-shrink: 0;
+    height: 34px;
+    background: $panel;
+    border-bottom: 1px solid $divider;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    transform: rotateX(180deg);
+
+    &::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        border: none;
+        border-radius: 2px;
+    }
+}
+
+.editorTab {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    padding: 0 6px 0 12px;
+    background: $panel;
+    color: $muted;
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transform: rotateX(180deg);
+}
+
+.editorTabActive {
+    background: $hover;
+    color: $text;
+    border-bottom-color: $accent;
+}
+
+.editorTabName {
+    margin-right: 2px;
+}
+
+.editorTabClose {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: $muted;
+    cursor: pointer;
+    opacity: 0;
+
+    &:hover {
+        background: $hover;
+        color: #fff;
+    }
+}
+
+.editorTab:hover .editorTabClose,
+.editorTabActive .editorTabClose {
+    opacity: 1;
+}
+
+.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: $muted;
+    font-size: 13px;
+}

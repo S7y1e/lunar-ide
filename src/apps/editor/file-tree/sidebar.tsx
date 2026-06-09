@@ -1,7 +1,7 @@
-import style from "./style.module.scss"
+import style from "./file-tree.module.scss"
 import FileTreeNode from "./file-tree-node";
-import { ActivityViewId } from "./activity-views";
-import { FileNode } from "../../lib/filesystem";
+import { ActivityViewId } from "../activity-bar/activity-views";
+import { FileNode } from "../../../lib/filesystem";
 import { useState } from "react";
 import { TreeSelectionContext } from "./tree-selection";
 import { VscChevronDown, VscCollapseAll, VscRefresh } from "react-icons/vsc";
@@ -9,9 +9,10 @@ import { VscChevronDown, VscCollapseAll, VscRefresh } from "react-icons/vsc";
 type Props = {
     currentWindow: ActivityViewId | null;
     path: string;
+    onOpenFile: (path: string) => void;
 };
 
-export default function Sidebar({ currentWindow, path }: Props) {
+export default function Sidebar({ currentWindow, path, onOpenFile }: Props) {
     const [selected, setSelected] = useState<string | null>(null);
     const [treeKey, setTreeKey] = useState(0);
 
@@ -52,7 +53,7 @@ export default function Sidebar({ currentWindow, path }: Props) {
             <div className={style.sidebarTree}>
                 {currentWindow === "project" && (
                     <TreeSelectionContext.Provider
-                        value={{ selected, select: setSelected }}
+                        value={{ selected, select: setSelected, openFile: onOpenFile }}
                     >
                         <FileTreeNode
                             key={`${rootNode.path}-${treeKey}`}

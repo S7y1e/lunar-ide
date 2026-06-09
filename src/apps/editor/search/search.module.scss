@@ -1,0 +1,93 @@
+@use "../styles/vars" as *;
+
+.paletteOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 12vh;
+}
+
+.palette {
+    width: 640px;
+    max-width: 90vw;
+    display: flex;
+    flex-direction: column;
+    background: $surface;
+    border: 1px solid $hover;
+    border-radius: 10px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.paletteTabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+}
+
+.paletteTab {
+    padding: 4px 10px;
+    border-radius: 6px;
+    color: $muted;
+    font-size: 13px;
+    user-select: none;
+}
+
+.paletteTabActive {
+    background: $hover;
+    color: #fff;
+}
+
+.paletteInput {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    background: $bar;
+    border: none;
+    border-top: 1px solid $divider;
+    border-bottom: 1px solid $divider;
+    color: $text;
+    font-size: 14px;
+    outline: none;
+}
+
+.paletteResults {
+    max-height: 50vh;
+    overflow: auto;
+}
+
+.paletteItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 26px;
+    padding: 0 12px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.paletteItemActive {
+    background: $selected;
+}
+
+.paletteName {
+    color: $text;
+    font-size: 13px;
+}
+
+.palettePath {
+    color: $muted;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.paletteMark {
+    background: transparent;
+    color: #e0a458;
+    font-weight: 600;
+}

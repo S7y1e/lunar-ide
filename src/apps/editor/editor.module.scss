@@ -1,0 +1,41 @@
+@use "./styles/vars" as *;
+
+.editor {
+    display: flex;
+    gap: 8px;
+    box-sizing: border-box;
+    height: calc(100vh - 36px);
+    width: 100%;
+    padding: 8px;
+    background: $surface;
+    color: $text;
+}
+
+.panels {
+    flex: 1;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    background: $panel;
+    height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.editorArea {
+    flex: 1;
+    min-height: 0;
+}
+
+.handle {
+    width: 8px;
+    background: transparent;
+    flex-shrink: 0;
+
+    &:hover {
+        background: $focus;
+        border-radius: 4px;
+    }
+}

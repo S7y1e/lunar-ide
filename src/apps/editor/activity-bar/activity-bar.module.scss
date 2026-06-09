@@ -1,0 +1,38 @@
+@use "../styles/vars" as *;
+
+.activityBar {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 8px;
+    width: 44px;
+    padding: 8px 0;
+    background: $surface;
+    border-radius: 8px;
+}
+
+.activityButton {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 18px;
+
+    &:hover {
+        background: $hover;
+        color: #fff;
+    }
+}
+
+.active {
+    background: $accent;
+}

@@ -1,4 +1,4 @@
-import styles from "./style.module.scss"
+import styles from "./activity-bar.module.scss"
 import {IconType} from "react-icons";
 
 type Props = {

@@ -1,77 +1,4 @@
-$accent: #3574f0;
-$focus: #3574f0;
-
-$surface: var(--bg-chrome);
-$panel: var(--bg-window);
-$bar: #1e1f22;
-$menu: #2b2d30;
-
-$text: #bcbec4;
-$muted: #6f737a;
-$icon: #9da0a8;
-
-$hover: #393b40;
-$selected: #2e436e;
-$selected-hover: #35527d;
-$divider: #232529;
-
-$scroll: #41454c;
-$scroll-hover: #565c65;
-
-$danger: #e06c69;
-$danger-hover: #3a2b2b;
-
-.editor {
-    display: flex;
-    gap: 8px;
-    box-sizing: border-box;
-    height: calc(100vh - 36px);
-    width: 100%;
-    padding: 8px;
-    background: $surface;
-    color: $text;
-}
-
-.activityBar {
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    align-items: center;
-    gap: 8px;
-    width: 44px;
-    padding: 8px 0;
-    background: $surface;
-    border-radius: 8px;
-}
-
-.activityButton {
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    color: #fff;
-    cursor: pointer;
-    font-size: 18px;
-
-    &:hover {
-        background: $hover;
-        color: #fff;
-    }
-}
-
-.active {
-    background: $accent;
-}
-
-.panels {
-    flex: 1;
-}
+@use "../styles/vars" as *;
 
 .sidebar {
     display: flex;
@@ -131,74 +58,6 @@ $danger-hover: #3a2b2b;
     flex: 1;
     overflow: auto;
     padding: 4px 0;
-
-    &::-webkit-scrollbar {
-        width: 12px;
-        height: 12px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background: $scroll;
-        border: 3px solid $surface;
-        border-radius: 8px;
-        background-clip: padding-box;
-    }
-
-    &::-webkit-scrollbar-thumb:hover {
-        background: $scroll-hover;
-        border: 3px solid $surface;
-        background-clip: padding-box;
-    }
-
-    &::-webkit-scrollbar-corner {
-        background: transparent;
-    }
-}
-
-.main {
-    background: $panel;
-    height: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    overflow: auto;
-}
-
-.terminal {
-    background: $surface;
-    padding: 12px;
-    overflow: auto;
-    color: $muted;
-}
-
-.handle {
-    width: 8px;
-    background: transparent;
-    flex-shrink: 0;
-
-    &:hover {
-        background: $focus;
-        border-radius: 4px;
-    }
-}
-
-.handleHorizontal {
-    height: 4px;
-    background: transparent;
-
-    &:hover {
-        background: $focus;
-    }
-}
-
-.title {
-    font-size: 24px;
-    margin: 0;
-}
-
-.path {
-    color: $muted;
-    font-size: 13px;
-    margin: 0;
 }
 
 .treeRow {
@@ -251,12 +110,6 @@ $danger-hover: #3a2b2b;
 .chevronSpacer {
     flex-shrink: 0;
     width: 16px;
-}
-
-.nodeIcon {
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
 }
 
 .nodeName {

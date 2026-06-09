@@ -1,4 +1,4 @@
-import styles from "./style.module.scss";
+import styles from "./activity-bar.module.scss";
 import ActivityButton from "./activity-button";
 import { useState } from "react";
 import {
@@ -6,7 +6,6 @@ import {
     DEFAULT_ACTIVITY_VIEW,
     ActivityViewId,
 } from "./activity-views";
-import {readDirectory} from "../../lib/filesystem";
 
 type Props = {
     onChange: (id: ActivityViewId | null) => void;
