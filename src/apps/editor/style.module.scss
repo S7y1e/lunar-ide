@@ -1,15 +1,35 @@
-$accent: #6cb5ff;
-$muted: #888;
-$focus: #007bff;
-$surface: #1f2125;
-$bar: #26282c;
+$accent: #3574f0;
+$focus: #3574f0;
+
+$surface: var(--bg-chrome);
+$panel: var(--bg-window);
+$bar: #1e1f22;
+$menu: #2b2d30;
+
+$text: #bcbec4;
+$muted: #6f737a;
+$icon: #9da0a8;
+
+$hover: #393b40;
+$selected: #2e436e;
+$selected-hover: #35527d;
+$divider: #232529;
+
+$scroll: #41454c;
+$scroll-hover: #565c65;
+
+$danger: #e06c69;
+$danger-hover: #3a2b2b;
 
 .editor {
     display: flex;
+    gap: 8px;
+    box-sizing: border-box;
     height: calc(100vh - 36px);
     width: 100%;
-    background: $bar;
-    color: $accent;
+    padding: 8px;
+    background: $surface;
+    color: $text;
 }
 
 .activityBar {
@@ -17,50 +37,126 @@ $bar: #26282c;
     flex-direction: column;
     flex-shrink: 0;
     align-items: center;
-    gap: 4px;
-    width: 40px;
+    gap: 8px;
+    width: 44px;
     padding: 8px 0;
-    background: $bar;
+    background: $surface;
+    border-radius: 8px;
 }
 
 .activityButton {
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 32px;
     height: 32px;
+    padding: 0;
     background: transparent;
     border: none;
     border-radius: 6px;
-    color: #FFFFFF;
+    color: #fff;
     cursor: pointer;
     font-size: 18px;
 
     &:hover {
-        background: #34373c;
+        background: $hover;
         color: #fff;
     }
 }
 
 .active {
-    background: #3871E1;
+    background: $accent;
 }
 
 .panels {
     flex: 1;
-    padding: 8px;
 }
 
 .sidebar {
-    background: $surface;
-    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    background: $panel;
     height: 100%;
     border-radius: 8px;
+    overflow: hidden;
+}
+
+.sidebarHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    height: 32px;
+    padding: 0 6px 0 10px;
+    border-bottom: 1px solid $divider;
+}
+
+.sidebarTitle {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: $text;
+    font-size: 12px;
+    user-select: none;
+}
+
+.sidebarActions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.sidebarBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: $icon;
+    cursor: pointer;
+
+    &:hover {
+        background: $hover;
+        color: #fff;
+    }
+}
+
+.sidebarTree {
+    flex: 1;
     overflow: auto;
+    padding: 4px 0;
+
+    &::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $scroll;
+        border: 3px solid $surface;
+        border-radius: 8px;
+        background-clip: padding-box;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: $scroll-hover;
+        border: 3px solid $surface;
+        background-clip: padding-box;
+    }
+
+    &::-webkit-scrollbar-corner {
+        background: transparent;
+    }
 }
 
 .main {
-    background: $surface;
+    background: $panel;
     height: 100%;
     padding: 12px;
     border-radius: 8px;
@@ -111,8 +207,7 @@ $bar: #26282c;
     gap: 4px;
     height: 22px;
     padding-right: 8px;
-    border-radius: 4px;
-    color: #d4d4d4;
+    color: $text;
     font-size: 13px;
     line-height: 22px;
     white-space: nowrap;
@@ -120,8 +215,25 @@ $bar: #26282c;
     user-select: none;
 
     &:hover {
-        background: #2a2d32;
+        background: $hover;
     }
+
+    &.selected {
+        background: $selected;
+    }
+
+    &.selected:hover {
+        background: $selected-hover;
+    }
+}
+
+.rootPath {
+    margin-left: 8px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: $muted;
+    font-size: 12px;
 }
 
 .chevron {
@@ -150,4 +262,64 @@ $bar: #26282c;
 .nodeName {
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.nodeInput {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    height: 18px;
+    padding: 0 4px;
+    background: $bar;
+    border: 1px solid $focus;
+    border-radius: 3px;
+    color: #fff;
+    font-size: 13px;
+    outline: none;
+}
+
+.contextOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+}
+
+.contextMenu {
+    position: fixed;
+    z-index: 1001;
+    min-width: 168px;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    background: $menu;
+    border: 1px solid $hover;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.contextItem {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: $text;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+        background: $hover;
+    }
+}
+
+.danger {
+    color: $danger;
+
+    &:hover {
+        background: $danger-hover;
+    }
 }

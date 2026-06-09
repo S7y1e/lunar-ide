@@ -3,9 +3,6 @@ import { FileNode } from "../../lib/filesystem";
 /**
  * Icons are from charmed-icons by Littensy (MIT).
  * See src/assets/icons/charmed/LICENSE.md.
- *
- * Vite eagerly resolves every SVG in the charmed folder to its URL, keyed by
- * the bare file name (without extension), e.g. ICONS["luau"] -> "/assets/luau.123.svg".
  */
 const modules = import.meta.glob("../../assets/icons/charmed/*.svg", {
     eager: true,
@@ -19,12 +16,10 @@ for (const [path, url] of Object.entries(modules)) {
     ICONS[base] = url;
 }
 
-// Generic fallbacks (always present in the asset folder).
 const FILE_FALLBACK = "_file";
 const FOLDER_FALLBACK = "_folder";
 const FOLDER_OPEN_FALLBACK = "_folder_open";
 
-/** Exact file name (lowercased) -> icon. Wins over extension matching. */
 const BY_FILENAME: Record<string, string> = {
     ".gitignore": "git",
     ".gitattributes": "git",
@@ -37,7 +32,6 @@ const BY_FILENAME: Record<string, string> = {
     licence: "license",
 };
 
-/** File extension (lowercased, no dot) -> icon. */
 const BY_EXTENSION: Record<string, string> = {
     luau: "luau",
     lua: "lua",
@@ -64,7 +58,6 @@ const BY_EXTENSION: Record<string, string> = {
     ico: "image",
 };
 
-/** Folder name (lowercased) -> folder icon suffix (folder_<suffix>[_open]). */
 const BY_FOLDER_NAME: Record<string, string> = {
     src: "source",
     source: "source",
@@ -102,7 +95,6 @@ const folderIcon = (name: string, expanded: boolean): string => {
     const suffix = BY_FOLDER_NAME[name.toLowerCase()];
     if (suffix) {
         const key = expanded ? `folder_${suffix}_open` : `folder_${suffix}`;
-        // Fall back to the generic folder if a specific open/closed variant is missing.
         return url(key, expanded ? FOLDER_OPEN_FALLBACK : FOLDER_FALLBACK);
     }
     return url(expanded ? FOLDER_OPEN_FALLBACK : FOLDER_FALLBACK, FOLDER_FALLBACK);
@@ -114,7 +106,6 @@ const fileIcon = (name: string): string => {
     const byName = BY_FILENAME[lower];
     if (byName) return url(byName, FILE_FALLBACK);
 
-    // Match the longest known extension first (e.g. "scene.project.json" -> "json").
     const parts = lower.split(".");
     for (let i = 1; i < parts.length; i++) {
         const ext = parts.slice(i).join(".");
@@ -125,6 +116,5 @@ const fileIcon = (name: string): string => {
     return ICONS[FILE_FALLBACK];
 };
 
-/** Resolves the charmed-icons SVG URL for a file-tree node. */
 export const resolveFileIcon = (node: FileNode, expanded: boolean): string =>
     node.isDir ? folderIcon(node.name, expanded) : fileIcon(node.name);

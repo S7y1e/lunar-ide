@@ -8,6 +8,7 @@ import {
     selectFolder,
     RecentProject,
 } from "./lib/projects";
+import {readDir} from "@tauri-apps/plugin-fs";
 
 export default function App() {
     const [screen, setScreen] = useState<"home" | "editor">("home");
@@ -31,6 +32,7 @@ export default function App() {
         const path = await selectFolder();
         if (path) {
             loadProjects();
+            readDir(path);
             openProject(path);
         }
     };

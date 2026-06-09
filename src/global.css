@@ -1,3 +1,8 @@
+:root {
+    --bg-window: #191a1c;
+    --bg-chrome: #26282c;
+}
+
 html,
 body,
 #root {
@@ -5,7 +10,7 @@ body,
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background: #191a1c;
+    background: var(--bg-window);
     font-family: Inter, monospace;
 }
 
