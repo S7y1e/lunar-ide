@@ -12,6 +12,11 @@ export type LspDiagnostic = {
 
 type LspDocumentation = string | { kind?: string; value: string } | undefined;
 
+export type LspTextEdit = {
+    range: LspRange;
+    newText: string;
+};
+
 export type LspCompletionItem = {
     label: string;
     kind?: number;
@@ -21,6 +26,8 @@ export type LspCompletionItem = {
     insertTextFormat?: number;
     sortText?: string;
     filterText?: string;
+    additionalTextEdits?: LspTextEdit[];
+    data?: unknown;
 };
 
 export type LspCompletionResult =
@@ -86,6 +93,43 @@ const COMPLETION_KIND: Record<number, monaco.languages.CompletionItemKind> = {
     25: monaco.languages.CompletionItemKind.TypeParameter,
 };
 
+function lspEditToMonaco(edit: LspTextEdit): monaco.languages.TextEdit {
+    return {
+        range: {
+            startLineNumber: edit.range.start.line + 1,
+            startColumn: edit.range.start.character + 1,
+            endLineNumber: edit.range.end.line + 1,
+            endColumn: edit.range.end.character + 1,
+        },
+        text: edit.newText,
+    };
+}
+
+export function toCompletionItem(
+    item: LspCompletionItem,
+    range: monaco.IRange
+): monaco.languages.CompletionItem {
+    return {
+        label: item.label,
+        kind:
+            COMPLETION_KIND[item.kind ?? 1] ??
+            monaco.languages.CompletionItemKind.Text,
+        insertText: item.insertText ?? item.label,
+        insertTextRules:
+            item.insertTextFormat === 2
+                ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+                : undefined,
+        detail: item.detail,
+        documentation: docToMarkdown(item.documentation),
+        sortText: item.sortText,
+        filterText: item.filterText,
+        additionalTextEdits: item.additionalTextEdits?.map(lspEditToMonaco),
+        // carry LSP item data so resolveCompletionItem can forward it
+        data: item,
+        range,
+    } as monaco.languages.CompletionItem & { data: LspCompletionItem };
+}
+
 export function toCompletionList(
     result: LspCompletionResult,
     model: monaco.editor.ITextModel,
@@ -99,24 +143,7 @@ export function toCompletionList(
         startColumn: word.startColumn,
         endColumn: word.endColumn,
     };
-    return {
-        suggestions: items.map((item) => ({
-            label: item.label,
-            kind:
-                COMPLETION_KIND[item.kind ?? 1] ??
-                monaco.languages.CompletionItemKind.Text,
-            insertText: item.insertText ?? item.label,
-            insertTextRules:
-                item.insertTextFormat === 2
-                    ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-                    : undefined,
-            detail: item.detail,
-            documentation: docToMarkdown(item.documentation),
-            sortText: item.sortText,
-            filterText: item.filterText,
-            range,
-        })),
-    };
+    return { suggestions: items.map((item) => toCompletionItem(item, range)) };
 }
 
 export function toHover(result: LspHover): monaco.languages.Hover | null {

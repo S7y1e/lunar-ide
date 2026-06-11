@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import * as monaco from "monaco-editor";
+import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import styles from "./editor.module.scss";
 import ActivityBar from "./activity-bar/activity-bar";
@@ -11,6 +14,7 @@ import EditorTabs from "./code-editor/editor-tabs";
 import EditorPane from "./code-editor/editor-pane";
 import { useOpenFiles } from "./code-editor/use-open-files";
 import { useLuauLsp } from "./code-editor/luau-lsp/use-luau-lsp";
+import { pathToUri } from "./code-editor/luau-lsp/uri";
 import SyncPanel from "./sync/sync-panel";
 import { useSyncServer } from "./sync/use-sync-server";
 import ToolchainPanel from "./toolchain/toolchain-panel";
@@ -41,6 +45,57 @@ export default function Editor({ path }: Props) {
         closeFile,
         reorderFiles,
     } = useOpenFiles();
+
+    // Track which files have unsaved changes
+    const [dirtyFiles, setDirtyFiles] = useState<Set<string>>(new Set());
+
+    const handleDirtyChange = useCallback((filePath: string, dirty: boolean) => {
+        setDirtyFiles((prev) => {
+            const hasDirty = prev.has(filePath);
+            if (dirty === hasDirty) return prev;
+            const next = new Set(prev);
+            if (dirty) next.add(filePath);
+            else next.delete(filePath);
+            return next;
+        });
+    }, []);
+
+    // Save all open files using Monaco's model store (authoritative content)
+    const openFilesRef = useRef(openFiles);
+    openFilesRef.current = openFiles;
+
+    const saveAll = useCallback(async () => {
+        const models = monaco.editor.getModels();
+        await Promise.all(
+            models.map(async (model) => {
+                const uri = model.uri.toString();
+                // Only save files that are open in the editor
+                const filePath = openFilesRef.current.find(
+                    (p) => pathToUri(p) === uri
+                );
+                if (filePath) {
+                    await writeTextFile(filePath, model.getValue());
+                }
+            })
+        );
+    }, []);
+
+    // Save all dirty files before the window closes
+    const saveAllRef = useRef(saveAll);
+    saveAllRef.current = saveAll;
+
+    useEffect(() => {
+        const win = getCurrentWindow();
+        let unlisten: (() => void) | undefined;
+        win.onCloseRequested(async (event) => {
+            event.preventDefault();
+            await saveAllRef.current();
+            await win.destroy();
+        }).then((fn) => {
+            unlisten = fn;
+        });
+        return () => unlisten?.();
+    }, []);
 
     return (
         <div className={styles.editor}>
@@ -105,12 +160,16 @@ export default function Editor({ path }: Props) {
                             <EditorTabs
                                 files={openFiles}
                                 active={activeFile}
+                                dirtyFiles={dirtyFiles}
                                 onSelect={setActiveFile}
                                 onClose={closeFile}
                                 onReorder={reorderFiles}
                             />
                             <div className={styles.editorArea}>
-                                <EditorPane path={activeFile} />
+                                <EditorPane
+                                    path={activeFile}
+                                    onDirtyChange={handleDirtyChange}
+                                />
                             </div>
                         </Panel>
 
@@ -123,7 +182,7 @@ export default function Editor({ path }: Props) {
                             collapsible
                             collapsedSize={0}
                             defaultSize="30%"
-                            minSize="10%"
+                            minSize="20%"
                         >
                             <TerminalView cwd={path} onClose={terminal.close} />
                         </Panel>

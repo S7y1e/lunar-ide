@@ -4,6 +4,7 @@ import {
     LspPosition,
     LspDiagnostic,
     LspCompletionResult,
+    LspCompletionItem,
     LspHover,
 } from "./convert";
 
@@ -69,6 +70,15 @@ export class LuauLspClient {
         this.resolveReady();
     }
 
+    /** Re-push configuration so the server re-pulls the latest values. */
+    notifyConfigChanged(): void {
+        this.ready.then(() =>
+            this.conn.sendNotification("workspace/didChangeConfiguration", {
+                settings: this.getConfig(),
+            })
+        );
+    }
+
     didOpen(uri: string, text: string): void {
         this.ready.then(() => {
             this.versions.set(uri, 1);
@@ -109,6 +119,11 @@ export class LuauLspClient {
         });
     }
 
+    async completionResolve(item: LspCompletionItem): Promise<LspCompletionItem> {
+        await this.ready;
+        return this.conn.sendRequest("completionItem/resolve", item);
+    }
+
     async hover(uri: string, position: LspPosition): Promise<LspHover> {
         await this.ready;
         return this.conn.sendRequest("textDocument/hover", {
@@ -136,6 +151,7 @@ function clientCapabilities() {
                 completionItem: {
                     snippetSupport: true,
                     documentationFormat: ["markdown", "plaintext"],
+                    resolveSupport: { properties: ["additionalTextEdits", "documentation", "detail"] },
                 },
             },
             hover: { contentFormat: ["markdown", "plaintext"] },

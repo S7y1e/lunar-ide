@@ -1,6 +1,13 @@
 import * as monaco from "monaco-editor";
 import { LuauLspClient } from "./client";
-import { toLspPosition, toCompletionList, toHover, toMarker } from "./convert";
+import {
+    toLspPosition,
+    toCompletionList,
+    toCompletionItem,
+    toHover,
+    toMarker,
+} from "./convert";
+import type { LspCompletionItem } from "./convert";
 
 const LUAU_LANGUAGES = new Set(["lua", "luau"]);
 const MARKER_OWNER = "luau-lsp";
@@ -45,6 +52,17 @@ export function registerLuauLsp(client: LuauLspClient): () => void {
                     const list = toCompletionList(result, model, position);
                     console.debug("[luau-lsp] completion", list.suggestions.length);
                     return list;
+                },
+                async resolveCompletionItem(item) {
+                    const lspItem = (item as monaco.languages.CompletionItem & { data?: LspCompletionItem }).data;
+                    if (!lspItem) return item;
+                    try {
+                        const resolved = await client.completionResolve(lspItem);
+                        if (!resolved.additionalTextEdits?.length) return item;
+                        return toCompletionItem(resolved, item.range as monaco.IRange);
+                    } catch {
+                        return item;
+                    }
                 },
             })
         );

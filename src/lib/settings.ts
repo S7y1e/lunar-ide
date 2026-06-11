@@ -25,8 +25,18 @@ export const readSettings = async (): Promise<SettingsValues> => {
     }
 };
 
+type SettingsListener = (values: SettingsValues) => void;
+const listeners = new Set<SettingsListener>();
+
+/** Subscribe to settings changes. Returns an unsubscribe function. */
+export const subscribeSettings = (listener: SettingsListener): (() => void) => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+};
+
 export const writeSettings = async (values: SettingsValues): Promise<void> => {
     await writeTextFile(SETTINGS_FILE_NAME, JSON.stringify(values, null, 2), {
         baseDir: BaseDirectory.AppLocalData,
     });
+    for (const listener of listeners) listener(values);
 };

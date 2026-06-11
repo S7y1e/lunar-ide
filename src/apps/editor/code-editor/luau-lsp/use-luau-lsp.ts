@@ -4,7 +4,7 @@ import { LuauLspClient } from "./client";
 import { registerLuauLsp } from "./monaco-bridge";
 import { buildConfigRoot } from "./config";
 import { pathToUri } from "./uri";
-import { readSettings } from "../../../../lib/settings";
+import { readSettings, subscribeSettings, SettingsValues } from "../../../../lib/settings";
 
 const DEFINITIONS_RESOURCE = "resources/globalTypes.PluginSecurity.d.luau";
 
@@ -23,15 +23,25 @@ export function useLuauLsp(rootPath: string) {
         let dispose = () => {};
         let stopped = false;
 
+        // Live config: getConfig reads this holder, so settings changes take
+        // effect without restarting the LSP.
+        let currentValues: SettingsValues = {};
+
+        const unsubscribe = subscribeSettings((values) => {
+            currentValues = values;
+            client?.notifyConfigChanged();
+        });
+
         (async () => {
             const [values, definitions] = await Promise.all([
                 readSettings(),
                 resolveDefinitions(),
             ]);
             if (stopped) return;
+            currentValues = values;
             client = new LuauLspClient(
                 pathToUri(rootPath),
-                () => buildConfigRoot(values),
+                () => buildConfigRoot(currentValues),
                 definitions
             );
             dispose = registerLuauLsp(client);
@@ -44,6 +54,7 @@ export function useLuauLsp(rootPath: string) {
 
         return () => {
             stopped = true;
+            unsubscribe();
             dispose();
             client?.stop().catch(() => {});
         };

@@ -5,6 +5,7 @@ import { useTabReorder } from "./use-tab-reorder";
 type Props = {
     files: string[];
     active: string | null;
+    dirtyFiles: Set<string>;
     onSelect: (path: string) => void;
     onClose: (path: string) => void;
     onReorder: (from: number, to: number) => void;
@@ -15,12 +16,13 @@ const baseName = (path: string): string => path.split(/[\\/]/).pop() ?? path;
 export default function EditorTabs({
     files,
     active,
+    dirtyFiles,
     onSelect,
     onClose,
     onReorder,
 }: Props) {
-    const { containerRef, draggingPath, startDrag, onPointerMove, endDrag, wasDragged } =
-        useTabReorder(files, onReorder);
+    const { containerRef, draggingPath, startDrag, onPointerMove, endDrag } =
+        useTabReorder(files, onReorder, onSelect);
 
     if (files.length === 0) return null;
 
@@ -41,11 +43,9 @@ export default function EditorTabs({
                     path={path}
                     name={baseName(path)}
                     active={path === active}
+                    dirty={dirtyFiles.has(path)}
                     dragging={path === draggingPath}
                     onPointerDown={(e) => startDrag(e, i)}
-                    onSelect={() => {
-                        if (!wasDragged()) onSelect(path);
-                    }}
                     onClose={() => onClose(path)}
                 />
             ))}

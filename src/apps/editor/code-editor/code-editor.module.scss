@@ -77,6 +77,15 @@
     opacity: 1;
 }
 
+.editorTabDirty {
+    opacity: 1;
+    color: $accent;
+
+    &:hover {
+        color: #fff;
+    }
+}
+
 .empty {
     display: flex;
     align-items: center;
