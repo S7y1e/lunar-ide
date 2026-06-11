@@ -1,73 +1,45 @@
-import { useEffect, useState } from "react";
-import { Group, Panel, Separator, usePanelRef } from "react-resizable-panels";
+import { useState } from "react";
+import { Group, Panel, Separator } from "react-resizable-panels";
 import styles from "./editor.module.scss";
 import ActivityBar from "./activity-bar/activity-bar";
+import { useActivityView } from "./activity-bar/use-activity-view";
 import Sidebar from "./file-tree/sidebar";
+import { useSidebarPanel } from "./file-tree/use-sidebar-panel";
 import SearchPalette from "./search/search-palette";
+import { useCommandPalette } from "./search/use-command-palette";
 import EditorTabs from "./code-editor/editor-tabs";
 import EditorPane from "./code-editor/editor-pane";
-import { ActivityViewId, DEFAULT_ACTIVITY_VIEW } from "./activity-bar/activity-views";
+import { useOpenFiles } from "./code-editor/use-open-files";
+import { useLuauLsp } from "./code-editor/luau-lsp/use-luau-lsp";
+import SettingsView from "./settings/settings-view";
 
 type Props = {
     path: string;
 };
 
 export default function Editor({ path }: Props) {
-    const [currentWindow, setCurrentWindow] = useState<ActivityViewId | null>(
-        DEFAULT_ACTIVITY_VIEW
-    );
-    const [openFiles, setOpenFiles] = useState<string[]>([]);
-    const [activeFile, setActiveFile] = useState<string | null>(null);
-    const [paletteOpen, setPaletteOpen] = useState(false);
+    const { currentView, toggleView } = useActivityView();
+    const sidebarRef = useSidebarPanel(currentView);
+    const palette = useCommandPalette();
+    const [settingsOpen, setSettingsOpen] = useState(false);
 
-    const sidebarRef = usePanelRef();
-
-    const openFile = (filePath: string) => {
-        setOpenFiles((prev) =>
-            prev.includes(filePath) ? prev : [...prev, filePath]
-        );
-        setActiveFile(filePath);
-    };
-
-    const reorderFiles = (from: number, to: number) => {
-        setOpenFiles((prev) => {
-            const next = [...prev];
-            const [moved] = next.splice(from, 1);
-            next.splice(to, 0, moved);
-            return next;
-        });
-    };
-
-    const closeFile = (filePath: string) => {
-        const idx = openFiles.indexOf(filePath);
-        const remaining = openFiles.filter((p) => p !== filePath);
-        setOpenFiles(remaining);
-        if (activeFile === filePath) {
-            setActiveFile(remaining[idx] ?? remaining[idx - 1] ?? null);
-        }
-    };
-
-    useEffect(() => {
-        const panel = sidebarRef.current;
-        if (!panel) return;
-        if (currentWindow) panel.expand();
-        else panel.collapse();
-    }, [currentWindow]);
-
-    useEffect(() => {
-        const onKey = (e: KeyboardEvent) => {
-            if (e.ctrlKey && (e.key === "p" || e.key === "P")) {
-                e.preventDefault();
-                setPaletteOpen(true);
-            }
-        };
-        window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
-    }, []);
+    useLuauLsp(path);
+    const {
+        openFiles,
+        activeFile,
+        setActiveFile,
+        openFile,
+        closeFile,
+        reorderFiles,
+    } = useOpenFiles();
 
     return (
         <div className={styles.editor}>
-            <ActivityBar onChange={setCurrentWindow} />
+            <ActivityBar
+                active={currentView}
+                onSelect={toggleView}
+                onOpenSettings={() => setSettingsOpen(true)}
+            />
 
             <Group
                 orientation="horizontal"
@@ -82,13 +54,13 @@ export default function Editor({ path }: Props) {
                     minSize="180px"
                 >
                     <Sidebar
-                        currentWindow={currentWindow}
+                        currentView={currentView}
                         path={path}
                         onOpenFile={openFile}
                     />
                 </Panel>
 
-                {currentWindow && <Separator className={styles.handle} />}
+                {currentView && <Separator className={styles.handle} />}
 
                 <Panel className={styles.main}>
                     <EditorTabs
@@ -104,13 +76,15 @@ export default function Editor({ path }: Props) {
                 </Panel>
             </Group>
 
-            {paletteOpen && (
+            {palette.isOpen && (
                 <SearchPalette
                     path={path}
-                    onClose={() => setPaletteOpen(false)}
+                    onClose={palette.close}
                     onOpen={(file) => openFile(file.path)}
                 />
             )}
+
+            {settingsOpen && <SettingsView onClose={() => setSettingsOpen(false)} />}
         </div>
     );
 }

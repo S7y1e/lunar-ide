@@ -1,0 +1,27 @@
+import type * as monaco from "monaco-editor";
+
+export const EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
+    minimap: { enabled: false },
+    fontSize: 13,
+    fontFamily: "'JetBrains Mono', monospace",
+    fontLigatures: true,
+    lineHeight: 20,
+    letterSpacing: 0,
+    smoothScrolling: true,
+    lineNumbersMinChars: 4,
+    lineDecorationsWidth: 25,
+    glyphMargin: false,
+    scrollBeyondLastLine: false,
+    padding: { top: 6 },
+    scrollbar: {
+        verticalScrollbarSize: 10,
+        horizontalScrollbarSize: 10,
+        useShadows: false,
+    },
+    guides: {
+        indentation: true,
+        highlightActiveIndentation: true,
+        bracketPairs: false,
+    },
+    rulers: [0],
+};

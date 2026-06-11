@@ -1,6 +1,4 @@
 import {
-    BaseDirectory,
-    exists,
     readDir,
     mkdir,
     remove,
@@ -9,10 +7,6 @@ import {
     readTextFile,
 } from "@tauri-apps/plugin-fs";
 import { join, dirname } from "@tauri-apps/api/path";
-
-const appFolder = exists("lunarApp", {
-    baseDir: BaseDirectory.Config,
-});
 
 export type FileNode = {
     name: string;

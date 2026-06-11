@@ -7,16 +7,16 @@ import { TreeSelectionContext } from "./tree-selection";
 import { VscChevronDown, VscCollapseAll, VscRefresh } from "react-icons/vsc";
 
 type Props = {
-    currentWindow: ActivityViewId | null;
+    currentView: ActivityViewId | null;
     path: string;
     onOpenFile: (path: string) => void;
 };
 
-export default function Sidebar({ currentWindow, path, onOpenFile }: Props) {
+export default function Sidebar({ currentView, path, onOpenFile }: Props) {
     const [selected, setSelected] = useState<string | null>(null);
     const [treeKey, setTreeKey] = useState(0);
 
-    if (!currentWindow) return null;
+    if (!currentView) return null;
 
     const rootName = path.replace(/[\\/]+$/, "").split(/[\\/]/).pop() || path;
     const rootNode: FileNode = { name: rootName, path, isDir: true };
@@ -51,7 +51,7 @@ export default function Sidebar({ currentWindow, path, onOpenFile }: Props) {
             </div>
 
             <div className={style.sidebarTree}>
-                {currentWindow === "project" && (
+                {currentView === "project" && (
                     <TreeSelectionContext.Provider
                         value={{ selected, select: setSelected, openFile: onOpenFile }}
                     >
