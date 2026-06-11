@@ -1,12 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { VscClose } from "react-icons/vsc";
 import styles from "./settings.module.scss";
-import {
-    LUAU_SETTINGS,
-    LuauSetting,
-    categoryOf,
-    settingCategories,
-} from "./luau-lsp-config";
+import { ALL_SETTINGS, settingsNav } from "./registry";
+import { Setting } from "./setting";
 import { useSettings } from "./use-settings";
 import SettingsField from "./settings-field";
 
@@ -14,18 +10,41 @@ type Props = {
     onClose: () => void;
 };
 
-const matches = (setting: LuauSetting, query: string): boolean => {
-    const q = query.toLowerCase();
-    return (
-        setting.key.toLowerCase().includes(q) ||
-        setting.description.toLowerCase().includes(q)
-    );
+type Section = {
+    id: string;
+    tool: string;
+    category: string;
+    settings: Setting[];
 };
+
+const matchesQuery = (setting: Setting, q: string): boolean =>
+    setting.key.toLowerCase().includes(q) ||
+    setting.label.toLowerCase().includes(q) ||
+    setting.description.toLowerCase().includes(q);
+
+function sectionsOf(settings: Setting[]): Section[] {
+    const sections: Section[] = [];
+    for (const setting of settings) {
+        const id = `${setting.tool}::${setting.category}`;
+        let section = sections.find((s) => s.id === id);
+        if (!section) {
+            section = {
+                id,
+                tool: setting.tool,
+                category: setting.category,
+                settings: [],
+            };
+            sections.push(section);
+        }
+        section.settings.push(setting);
+    }
+    return sections;
+}
 
 export default function SettingsView({ onClose }: Props) {
     const { values, setValue, resetValue } = useSettings();
     const [query, setQuery] = useState("");
-    const [category, setCategory] = useState<string | null>(null);
+    const [selected, setSelected] = useState<string | null>(null);
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
@@ -35,17 +54,18 @@ export default function SettingsView({ onClose }: Props) {
         return () => window.removeEventListener("keydown", onKey);
     }, [onClose]);
 
-    const categories = useMemo(settingCategories, []);
+    const nav = useMemo(settingsNav, []);
 
-    const visible = useMemo(
-        () =>
-            LUAU_SETTINGS.filter(
-                (s) =>
-                    (!category || categoryOf(s.key) === category) &&
-                    (!query || matches(s, query))
-            ),
-        [category, query]
-    );
+    const sections = useMemo(() => {
+        const q = query.trim().toLowerCase();
+        const visible = ALL_SETTINGS.filter((setting) => {
+            if (selected && `${setting.tool}::${setting.category}` !== selected) {
+                return false;
+            }
+            return !q || matchesQuery(setting, q);
+        });
+        return sectionsOf(visible);
+    }, [query, selected]);
 
     return (
         <div className={styles.settingsOverlay}>
@@ -72,42 +92,60 @@ export default function SettingsView({ onClose }: Props) {
                 <nav className={styles.nav}>
                     <button
                         className={`${styles.navItem} ${
-                            category === null ? styles.navItemActive : ""
+                            selected === null ? styles.navItemActive : ""
                         }`}
-                        onClick={() => setCategory(null)}
+                        onClick={() => setSelected(null)}
                     >
-                        All
+                        All settings
                     </button>
-                    {categories.map((name) => (
-                        <button
-                            key={name}
-                            className={`${styles.navItem} ${
-                                category === name ? styles.navItemActive : ""
-                            }`}
-                            onClick={() => setCategory(name)}
-                        >
-                            {name}
-                        </button>
+                    {nav.map((tool) => (
+                        <div key={tool.name} className={styles.navTool}>
+                            <span className={styles.navToolName}>{tool.name}</span>
+                            {tool.categories.map((category) => {
+                                const id = `${tool.name}::${category}`;
+                                return (
+                                    <button
+                                        key={id}
+                                        className={`${styles.navItem} ${
+                                            selected === id ? styles.navItemActive : ""
+                                        }`}
+                                        onClick={() => setSelected(id)}
+                                    >
+                                        {category}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     ))}
                 </nav>
 
                 <div className={styles.fields}>
-                    {visible.length === 0 ? (
+                    {sections.length === 0 ? (
                         <div className={styles.empty}>No settings match your search.</div>
                     ) : (
-                        visible.map((setting) => (
-                            <SettingsField
-                                key={setting.key}
-                                setting={setting}
-                                value={
-                                    setting.key in values
-                                        ? values[setting.key]
-                                        : setting.default
-                                }
-                                modified={setting.key in values}
-                                onChange={(v) => setValue(setting.key, v)}
-                                onReset={() => resetValue(setting.key)}
-                            />
+                        sections.map((section) => (
+                            <section key={section.id} className={styles.section}>
+                                <h3 className={styles.sectionHead}>
+                                    <span className={styles.sectionTool}>
+                                        {section.tool}
+                                    </span>
+                                    {section.category}
+                                </h3>
+                                {section.settings.map((setting) => (
+                                    <SettingsField
+                                        key={setting.key}
+                                        setting={setting}
+                                        value={
+                                            setting.key in values
+                                                ? values[setting.key]
+                                                : setting.default
+                                        }
+                                        modified={setting.key in values}
+                                        onChange={(v) => setValue(setting.key, v)}
+                                        onReset={() => resetValue(setting.key)}
+                                    />
+                                ))}
+                            </section>
                         ))
                     )}
                 </div>

@@ -565,11 +565,3 @@ export const labelOf = (key: string): string => {
     return parts.slice(1).map(humanizeWord).join(" › ");
 };
 
-export const settingCategories = (): string[] => {
-    const seen: string[] = [];
-    for (const setting of LUAU_SETTINGS) {
-        const category = categoryOf(setting.key);
-        if (!seen.includes(category)) seen.push(category);
-    }
-    return seen;
-};

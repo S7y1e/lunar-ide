@@ -29,7 +29,12 @@
     "bundle": {
         "active": true,
         "targets": "all",
-        "externalBin": ["binaries/luau-lsp"],
+        "externalBin": [
+            "binaries/luau-lsp",
+            "binaries/rojo",
+            "binaries/argon",
+            "binaries/rokit"
+        ],
         "resources": ["resources/globalTypes.PluginSecurity.d.luau"],
         "icon": [
             "icons/32x32.png",

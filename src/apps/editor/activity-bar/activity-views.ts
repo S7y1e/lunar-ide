@@ -1,8 +1,9 @@
 import { IconType } from "react-icons";
 import { FaRegFolder } from "react-icons/fa";
 import { IoSyncOutline } from "react-icons/io5";
+import { VscTools } from "react-icons/vsc";
 
-export type ActivityViewId = "project" | "sync";
+export type ActivityViewId = "project" | "sync" | "toolchain";
 
 export type ActivityView = {
     id: ActivityViewId;
@@ -20,6 +21,11 @@ export const ACTIVITY_VIEWS: ActivityView[] = [
         id: "sync",
         label: "Sync",
         icon: IoSyncOutline,
+    },
+    {
+        id: "toolchain",
+        label: "Toolchain",
+        icon: VscTools,
     },
 ];
 

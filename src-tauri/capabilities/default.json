@@ -42,7 +42,12 @@
     },
     {
       "identifier": "shell:allow-spawn",
-      "allow": [{ "name": "binaries/luau-lsp", "sidecar": true, "args": true }]
+      "allow": [
+        { "name": "binaries/luau-lsp", "sidecar": true, "args": true },
+        { "name": "binaries/rojo", "sidecar": true, "args": true },
+        { "name": "binaries/argon", "sidecar": true, "args": true },
+        { "name": "binaries/rokit", "sidecar": true, "args": true }
+      ]
     },
     "shell:allow-stdin-write",
     "shell:allow-kill"

@@ -1,10 +1,10 @@
 import styles from "./settings.module.scss";
-import { LuauSetting, labelOf } from "./luau-lsp-config";
+import { Setting } from "./setting";
 import StringListField from "./string-list-field";
 import RecordField from "./record-field";
 
 type Props = {
-    setting: LuauSetting;
+    setting: Setting;
     value: unknown;
     modified: boolean;
     onChange: (value: unknown) => void;
@@ -21,7 +21,7 @@ export default function SettingsField({
     return (
         <div className={styles.field}>
             <div className={styles.fieldHead}>
-                <span className={styles.fieldLabel}>{labelOf(setting.key)}</span>
+                <span className={styles.fieldLabel}>{setting.label}</span>
                 <span className={styles.fieldKey}>{setting.key}</span>
                 {modified && (
                     <button className={styles.fieldReset} onClick={onReset}>
@@ -40,7 +40,7 @@ function Control({
     value,
     onChange,
 }: {
-    setting: LuauSetting;
+    setting: Setting;
     value: unknown;
     onChange: (value: unknown) => void;
 }) {

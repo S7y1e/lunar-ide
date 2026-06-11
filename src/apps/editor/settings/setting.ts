@@ -1,0 +1,19 @@
+export type SettingType =
+    | "boolean"
+    | "string"
+    | "number"
+    | "string[]"
+    | "record";
+
+export type Setting = {
+    key: string;
+    tool: string;
+    category: string;
+    label: string;
+    type: SettingType;
+    default: boolean | string | number | string[] | Record<string, string>;
+    description: string;
+    enum?: string[];
+    min?: number;
+    max?: number;
+};
