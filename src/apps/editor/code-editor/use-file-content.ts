@@ -2,6 +2,13 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { writeTextFile, watch, UnwatchFn } from "@tauri-apps/plugin-fs";
 import { readFileText } from "../../../lib/filesystem";
 
+// Normalize to LF before the text ever reaches Monaco. Argon rewrites files
+// with CRLF on Windows; if that reaches the editor the model and luau-lsp
+// disagree on column counts ("end character > line length" semantic-token
+// errors) and highlighting/features break. Keeping the buffer LF-only makes
+// the editor and the language server agree no matter how Argon stores it.
+const toLf = (s: string) => s.replace(/\r\n/g, "\n");
+
 // Compare ignoring line-ending and trailing-newline differences. Argon
 // round-trips a saved file back to disk (push to Studio, then rewrite),
 // usually only normalizing EOLs. Without this, our own save would look like
@@ -27,6 +34,29 @@ async function writeWithRetry(path: string, content: string): Promise<void> {
     throw lastErr;
 }
 
+// Reads can also fail with a sharing violation while the sync tool holds the
+// file. Retry instead of falling back to empty content — treating a failed
+// read as "" is what lets the editor later overwrite the real file with
+// nothing.
+async function readWithRetry(path: string): Promise<string> {
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < 5; attempt++) {
+        try {
+            return await readFileText(path);
+        } catch (e) {
+            lastErr = e;
+            await new Promise((r) => setTimeout(r, 80 * (attempt + 1)));
+        }
+    }
+    throw lastErr;
+}
+
+// Per-file buffer state, kept so switching tabs is synchronous. Without this,
+// the disk read is async and for a moment the hook still holds the *previous*
+// file's content under the new path — which the controlled Monaco editor would
+// write into the new file's model, cross-contaminating open files.
+type Snapshot = { content: string; saved: string; disk: string; external: string | null };
+
 export function useFileContent(path: string | null) {
     const [content, setContent] = useState("");
     const [savedContent, setSavedContent] = useState("");
@@ -40,60 +70,106 @@ export function useFileContent(path: string | null) {
     // Always-current refs so the watcher/save don't need these in deps.
     const contentRef = useRef(content);
     contentRef.current = content;
+    const savedRef = useRef(savedContent);
+    savedRef.current = savedContent;
     const externalRef = useRef(externalContent);
     externalRef.current = externalContent;
-    // What we believe is currently on disk. Updated on load, on our own save,
-    // and once an external change is reloaded. Used to tell our own writes
-    // apart from external ones and to avoid re-prompting for the same content.
+    // What we believe is currently on disk for the active path. Used to tell our
+    // own writes apart from external ones and to avoid re-prompting.
     const diskRef = useRef("");
 
-    // Load on open. From here on we never silently replace the buffer: external
-    // writes are surfaced via `externalContent` and the user chooses what wins.
+    // One snapshot per opened file, and the set of files already read once.
+    const cacheRef = useRef<Map<string, Snapshot>>(new Map());
+    const loadedRef = useRef<Set<string>>(new Set());
+
+    // Swap buffers synchronously when the active file changes (React's "adjust
+    // state during render" pattern), so the editor never sees another file's
+    // content under this path.
+    const [trackedPath, setTrackedPath] = useState(path);
+    if (path !== trackedPath) {
+        if (trackedPath) {
+            cacheRef.current.set(trackedPath, {
+                content,
+                saved: savedContent,
+                disk: diskRef.current,
+                external: externalContent,
+            });
+        }
+        const next = path ? cacheRef.current.get(path) : undefined;
+        setTrackedPath(path);
+        setContent(next?.content ?? "");
+        setSavedContent(next?.saved ?? "");
+        setExternalContent(next?.external ?? null);
+        setSaveError(null);
+        diskRef.current = next?.disk ?? "";
+    }
+
     useEffect(() => {
         if (!path) return;
         let alive = true;
         let unwatch: UnwatchFn | undefined;
 
-        setExternalContent(null);
+        const applyDisk = (raw: string) => {
+            const c = toLf(raw);
+            diskRef.current = c;
+            setContent(c);
+            setSavedContent(c);
+        };
 
-        readFileText(path)
-            .then((c) => {
-                if (!alive) return;
-                diskRef.current = c;
-                setContent(c);
-                setSavedContent(c);
+        // Reconcile a disk change against the buffer, VS Code style:
+        //  - identical (modulo EOL) to what we have: no-op.
+        //  - no unsaved edits: reload silently (nothing to lose).
+        //  - unsaved edits present: surface a prompt; never clobber the buffer.
+        const reconcile = (raw: string) => {
+            const disk = toLf(raw);
+            if (sameText(disk, diskRef.current)) {
+                diskRef.current = disk;
+                return;
+            }
+            diskRef.current = disk;
+            if (sameText(disk, contentRef.current)) {
+                setSavedContent(disk);
+                setExternalContent(null);
+                return;
+            }
+            const dirty = contentRef.current !== savedRef.current;
+            if (!dirty) {
+                setContent(disk);
+                setSavedContent(disk);
+                setExternalContent(null);
+                return;
+            }
+            setExternalContent(disk);
+        };
+
+        // Load a file the first time it's opened (or recover if an earlier read
+        // failed). Returning to an already-loaded file keeps its in-memory
+        // buffer and only reconciles disk changes that happened in the
+        // background. A read that never succeeds leaves the file *unloaded* so
+        // save() refuses to touch it — far better than blanking it.
+        const ingest = (raw: string) => {
+            if (!loadedRef.current.has(path)) {
+                loadedRef.current.add(path);
+                applyDisk(raw);
+            } else {
+                reconcile(raw);
+            }
+        };
+
+        readWithRetry(path)
+            .then((raw) => {
+                if (alive) ingest(raw);
             })
-            .catch(() => {
-                if (!alive) return;
-                diskRef.current = "";
-                setContent("");
-                setSavedContent("");
+            .catch((e) => {
+                if (alive) console.error("[file] read failed", path, e);
             });
 
         watch(
             path,
             () => {
-                readFileText(path)
-                    .then((disk) => {
-                        if (!alive) return;
-                        // Our own write, or Argon echoing it back with only
-                        // EOL changes -> just track the new bytes, no prompt.
-                        if (sameText(disk, diskRef.current)) {
-                            diskRef.current = disk;
-                            return;
-                        }
-                        diskRef.current = disk;
-                        // The buffer already matches the new disk contents
-                        // (ignoring EOLs): rebaseline, no prompt needed.
-                        if (sameText(disk, contentRef.current)) {
-                            setSavedContent(disk);
-                            setExternalContent(null);
-                            return;
-                        }
-                        // A real external change (edited in Studio): surface it
-                        // and let the user decide. Never overwrite the open
-                        // buffer on our own.
-                        setExternalContent(disk);
+                readWithRetry(path)
+                    .then((raw) => {
+                        if (alive) ingest(raw);
                     })
                     .catch(() => {});
             },
@@ -113,6 +189,14 @@ export function useFileContent(path: string | null) {
 
     const save = useCallback(async () => {
         if (!path) return;
+        // Never write a file we couldn't read: its buffer is empty/unknown and
+        // saving would wipe the real content on disk.
+        if (!loadedRef.current.has(path)) {
+            setSaveError(
+                "File not loaded yet (still locked by the sync tool?) — not saving to avoid overwriting it."
+            );
+            return;
+        }
         const current = contentRef.current;
         try {
             await writeWithRetry(path, current);

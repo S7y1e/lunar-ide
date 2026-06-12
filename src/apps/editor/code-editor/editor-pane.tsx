@@ -33,6 +33,11 @@ export default function EditorPane({ path, onDirtyChange }: Props) {
     const autocompleteEndEnabled = useRef(false);
     const onDirtyRef = useRef(onDirtyChange);
     onDirtyRef.current = onDirtyChange;
+    // The Monaco save action is registered once on mount, so it must read the
+    // *current* save through a ref. Otherwise it keeps calling the save bound to
+    // the first file ever opened and writes every Ctrl+S into that file.
+    const saveRef = useRef(save);
+    saveRef.current = save;
 
     // Single source of truth for the dirty indicator: buffer vs. what's on disk.
     // This also self-corrects when the file is reloaded after an external
@@ -54,7 +59,7 @@ export default function EditorPane({ path, onDirtyChange }: Props) {
             label: "Save File",
             keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
             run: () => {
-                save().catch((e) => console.error("save failed", e));
+                saveRef.current().catch((e) => console.error("save failed", e));
             },
         });
     }

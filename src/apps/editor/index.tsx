@@ -60,20 +60,20 @@ export default function Editor({ path }: Props) {
         });
     }, []);
 
-    // Save all open files using Monaco's model store (authoritative content)
-    const openFilesRef = useRef(openFiles);
-    openFilesRef.current = openFiles;
+    // Save only files the user actually edited. Writing every open model is
+    // dangerous: a model that failed to load (or never loaded) holds "" and
+    // would wipe the file on close. Dirty-only mirrors how editors like VS Code
+    // behave and makes accidental data loss impossible.
+    const dirtyFilesRef = useRef(dirtyFiles);
+    dirtyFilesRef.current = dirtyFiles;
 
     const saveAll = useCallback(async () => {
-        const models = monaco.editor.getModels();
         await Promise.all(
-            models.map(async (model) => {
-                const uri = model.uri.toString();
-                // Only save files that are open in the editor
-                const filePath = openFilesRef.current.find(
-                    (p) => pathToUri(p) === uri
+            [...dirtyFilesRef.current].map(async (filePath) => {
+                const model = monaco.editor.getModel(
+                    monaco.Uri.parse(pathToUri(filePath))
                 );
-                if (!filePath) return;
+                if (!model) return;
                 try {
                     await writeTextFile(filePath, model.getValue());
                 } catch (e) {

@@ -58,8 +58,23 @@ export function useSyncServer(rootPath: string) {
     const [port, setPort] = useState(DEFAULT_PORT.rojo);
     const childRef = useRef<Child | null>(null);
 
-    const append = (line: string) =>
-        setLogs((prev) => [...prev, line].slice(-MAX_LOG_LINES));
+    // Rojo/Argon can emit hundreds of lines in a burst on startup. Updating
+    // state per line copies the whole log array and re-renders the panel each
+    // time, which freezes the UI. Buffer incoming lines and flush them on a
+    // timer so a burst costs one render instead of hundreds.
+    const logBufferRef = useRef<string[]>([]);
+    const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const append = (line: string) => {
+        logBufferRef.current.push(line);
+        if (flushTimerRef.current !== null) return;
+        flushTimerRef.current = setTimeout(() => {
+            flushTimerRef.current = null;
+            const buffered = logBufferRef.current;
+            logBufferRef.current = [];
+            setLogs((prev) => [...prev, ...buffered].slice(-MAX_LOG_LINES));
+        }, 120);
+    };
 
     const setBackend = (next: SyncBackend) => {
         if (childRef.current) return;
@@ -69,6 +84,7 @@ export function useSyncServer(rootPath: string) {
 
     const start = async () => {
         if (childRef.current) return;
+        logBufferRef.current = [];
         setLogs([]);
         setStatus("running");
         try {
@@ -122,6 +138,10 @@ export function useSyncServer(rootPath: string) {
         return () => {
             childRef.current?.kill();
             childRef.current = null;
+            if (flushTimerRef.current !== null) {
+                clearTimeout(flushTimerRef.current);
+                flushTimerRef.current = null;
+            }
             setStatus("stopped");
         };
     }, [rootPath]);
