@@ -84,12 +84,18 @@ export default function Editor({ path }: Props) {
     const saveAllRef = useRef(saveAll);
     saveAllRef.current = saveAll;
 
+    // Stop the sync server before closing so its sidecar (Rojo/Argon) doesn't
+    // get orphaned and keep holding its port.
+    const stopSyncRef = useRef(sync.stop);
+    stopSyncRef.current = sync.stop;
+
     useEffect(() => {
         const win = getCurrentWindow();
         let unlisten: (() => void) | undefined;
         win.onCloseRequested(async (event) => {
             event.preventDefault();
             await saveAllRef.current();
+            await stopSyncRef.current();
             await win.destroy();
         }).then((fn) => {
             unlisten = fn;

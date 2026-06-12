@@ -102,12 +102,21 @@ export function useSyncServer(rootPath: string) {
         setStatus("stopped");
     };
 
+    // Switching projects keeps this hook mounted and only changes `rootPath`,
+    // so a server started for the old project would otherwise keep holding its
+    // port. Tear it down whenever the project changes (and on unmount).
+    //
+    // Closing the window is handled by the editor's single close handler (it
+    // calls `stop` before destroying the window), so we don't register our own
+    // close listener here — two competing handlers both calling preventDefault
+    // would deadlock the close.
     useEffect(() => {
         return () => {
             childRef.current?.kill();
             childRef.current = null;
+            setStatus("stopped");
         };
-    }, []);
+    }, [rootPath]);
 
     return { backend, setBackend, status, logs, port, setPort, start, stop };
 }
