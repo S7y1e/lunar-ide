@@ -20,6 +20,11 @@
       "identifier": "fs:allow-write-text-file",
       "allow": [{ "path": "**" }]
     },
+    {
+      "identifier": "fs:allow-watch",
+      "allow": [{ "path": "**" }]
+    },
+    "fs:allow-unwatch",
     "core:window:allow-minimize",
     "core:window:allow-toggle-maximize",
     "core:window:allow-close",

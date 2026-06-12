@@ -18,21 +18,19 @@ type Props = {
 };
 
 export default function EditorPane({ path, onDirtyChange }: Props) {
-    const { content, setContent, save } = useFileContent(path);
+    const { content, setContent, save, isDirty } = useFileContent(path);
     const [theme, setTheme] = useState(getTheme());
     useEffect(() => subscribeTheme(setTheme), []);
     const autocompleteEndEnabled = useRef(false);
     const onDirtyRef = useRef(onDirtyChange);
     onDirtyRef.current = onDirtyChange;
 
-    // Tracks whether we've already reported dirty=true for the current path
-    const reportedDirtyRef = useRef(false);
-    // Reset when path changes
-    const prevPathRef = useRef(path);
-    if (path !== prevPathRef.current) {
-        prevPathRef.current = path;
-        reportedDirtyRef.current = false;
-    }
+    // Single source of truth for the dirty indicator: buffer vs. what's on disk.
+    // This also self-corrects when the file is reloaded after an external
+    // (Argon) write, since isDirty goes back to false.
+    useEffect(() => {
+        if (path) onDirtyRef.current(path, isDirty);
+    }, [path, isDirty]);
 
     function handleMount(editor: monaco.editor.IStandaloneCodeEditor) {
         readSettings().then((values) => {
@@ -47,11 +45,7 @@ export default function EditorPane({ path, onDirtyChange }: Props) {
             label: "Save File",
             keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
             run: () => {
-                if (!path) return;
-                save().then(() => {
-                    reportedDirtyRef.current = false;
-                    onDirtyRef.current(path, false);
-                });
+                save().catch((e) => console.error("save failed", e));
             },
         });
     }
@@ -59,10 +53,6 @@ export default function EditorPane({ path, onDirtyChange }: Props) {
     function handleChange(value: string) {
         if (!path) return;
         setContent(value);
-        if (!reportedDirtyRef.current) {
-            reportedDirtyRef.current = true;
-            onDirtyRef.current(path, true);
-        }
     }
 
     if (!path) {

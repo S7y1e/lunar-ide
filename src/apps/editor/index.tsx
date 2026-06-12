@@ -73,8 +73,12 @@ export default function Editor({ path }: Props) {
                 const filePath = openFilesRef.current.find(
                     (p) => pathToUri(p) === uri
                 );
-                if (filePath) {
+                if (!filePath) return;
+                try {
                     await writeTextFile(filePath, model.getValue());
+                } catch (e) {
+                    // Don't let one failed write abort saving the others.
+                    console.error("failed to save", filePath, e);
                 }
             })
         );
@@ -94,8 +98,19 @@ export default function Editor({ path }: Props) {
         let unlisten: (() => void) | undefined;
         win.onCloseRequested(async (event) => {
             event.preventDefault();
-            await saveAllRef.current();
-            await stopSyncRef.current();
+            // Best-effort save and sync shutdown: a failure in either must not
+            // block the window from closing, so each is isolated and we always
+            // reach destroy().
+            try {
+                await saveAllRef.current();
+            } catch (e) {
+                console.error("save on close failed", e);
+            }
+            try {
+                await stopSyncRef.current();
+            } catch (e) {
+                console.error("sync stop on close failed", e);
+            }
             await win.destroy();
         }).then((fn) => {
             unlisten = fn;
