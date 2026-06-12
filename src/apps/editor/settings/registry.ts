@@ -1,6 +1,7 @@
 import { Setting } from "./setting";
 import { LUAU_SETTINGS, categoryOf, labelOf } from "./luau-lsp-config";
 import { ARGON_SETTINGS } from "./argon-config";
+import { APPEARANCE_SETTINGS } from "./appearance-config";
 
 const luauSettings: Setting[] = LUAU_SETTINGS.map((s) => ({
     key: s.key,
@@ -15,7 +16,11 @@ const luauSettings: Setting[] = LUAU_SETTINGS.map((s) => ({
     max: s.max,
 }));
 
-export const ALL_SETTINGS: Setting[] = [...luauSettings, ...ARGON_SETTINGS];
+export const ALL_SETTINGS: Setting[] = [
+    ...APPEARANCE_SETTINGS,
+    ...luauSettings,
+    ...ARGON_SETTINGS,
+];
 
 export type NavTool = { name: string; categories: string[] };
 

@@ -1,11 +1,13 @@
+@use "../../apps/editor/styles/vars" as *;
+
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 36px;
   width: 100%;
-  background: var(--bg-chrome);
-  border-bottom: 1px solid #1f2125;
+  background: $surface;
+  border-bottom: 1px solid $border;
   user-select: none;
 }
 
@@ -23,9 +25,9 @@
   justify-content: center;
   width: 22px;
   height: 22px;
-  background: #34373c;
+  background: $hover;
   border-radius: 5px;
-  color: #6cb5ff;
+  color: $brand;
   font-size: 13px;
   font-weight: 600;
 }
@@ -44,17 +46,17 @@
   height: 36px;
   background: transparent;
   border: none;
-  color: #b0b0b0;
+  color: $icon;
   cursor: pointer;
 
   &:hover {
-    background: #34373c;
-    color: #fff;
+    background: $hover;
+    color: $text-bright;
   }
 
   &.close:hover {
-    background: #e81123;
-    color: #fff;
+    background: $close-danger;
+    color: $text-bright;
   }
 }
 
@@ -65,14 +67,14 @@
 .menuButton {
   background: transparent;
   border: none;
-  color: #e8e8e8;
+  color: $text;
   cursor: pointer;
   font-size: 13px;
   padding: 4px 10px;
   border-radius: 4px;
 
   &:hover {
-    background: #34373c;
+    background: $hover;
   }
 }
 
@@ -81,8 +83,8 @@
   top: 100%;
   left: 0;
   min-width: 180px;
-  background: #2a2d31;
-  border: 1px solid #1f2125;
+  background: $menu;
+  border: 1px solid $border;
   border-radius: 6px;
   padding: 4px;
   z-index: 100;
@@ -95,18 +97,18 @@
   text-align: left;
   background: transparent;
   border: none;
-  color: #e8e8e8;
+  color: $text;
   cursor: pointer;
   font-size: 13px;
   padding: 6px 10px;
   border-radius: 4px;
 
   &:hover {
-    background: #34373c;
+    background: $hover;
   }
 
   &:disabled {
-    color: #555;
+    color: $disabled;
     cursor: default;
   }
 }
@@ -116,15 +118,15 @@
   top: 0;
   left: 100%;
   min-width: 180px;
-  background: #2a2d31;
-  border: 1px solid #1f2125;
+  background: $menu;
+  border: 1px solid $border;
   border-radius: 6px;
   padding: 4px;
 }
 
 .empty {
   display: block;
-  color: #555;
+  color: $disabled;
   font-size: 13px;
   padding: 6px 10px;
 }

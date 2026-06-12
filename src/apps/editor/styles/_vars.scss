@@ -1,19 +1,31 @@
-$accent: #3574f0;
-$focus: #3574f0;
+// SCSS aliases for the runtime theme tokens defined in src/themes.css.
+// These are plain `var(--token)` references so themes can be swapped live by
+// flipping the `data-theme` attribute on <html>.
+
+$accent: var(--accent);
+$brand: var(--brand);
+$focus: var(--focus);
 
 $surface: var(--bg-chrome);
 $panel: var(--bg-window);
-$bar: #1e1f22;
-$menu: #2b2d30;
+$deep: var(--bg-deep);
+$bar: var(--bar);
+$menu: var(--menu);
 
-$text: #bcbec4;
-$muted: #6f737a;
-$icon: #9da0a8;
+$text: var(--text);
+$text-bright: var(--text-bright);
+$muted: var(--muted);
+$icon: var(--icon);
+$disabled: var(--disabled);
 
-$hover: #393b40;
-$selected: #2e436e;
-$selected-hover: #35527d;
-$divider: #232529;
+$hover: var(--hover);
+$selected: var(--selected);
+$selected-hover: var(--selected-hover);
+$divider: var(--divider);
+$border: var(--border);
 
-$danger: #e06c69;
-$danger-hover: #3a2b2b;
+$danger: var(--danger);
+$danger-hover: var(--danger-hover);
+$close-danger: var(--close-danger);
+$success: var(--success);
+$warning: var(--warning);

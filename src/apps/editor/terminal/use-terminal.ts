@@ -3,8 +3,17 @@ import { invoke, Channel } from "@tauri-apps/api/core";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
+import { readToken, subscribeTheme } from "../../../lib/theme";
 
 let counter = 0;
+
+function xtermTheme() {
+    return {
+        background: readToken("bg-window"),
+        foreground: readToken("editor-fg"),
+        cursor: readToken("text-bright"),
+    };
+}
 
 export function useTerminal(cwd: string) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -17,7 +26,10 @@ export function useTerminal(cwd: string) {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 13,
             cursorBlink: true,
-            theme: { background: "#191a1c", foreground: "#a9b7c6" },
+            theme: xtermTheme(),
+        });
+        const unsubscribeTheme = subscribeTheme(() => {
+            term.options.theme = xtermTheme();
         });
         const fit = new FitAddon();
         term.loadAddon(fit);
@@ -53,6 +65,7 @@ export function useTerminal(cwd: string) {
         observer.observe(container);
 
         return () => {
+            unsubscribeTheme();
             observer.disconnect();
             dataSub.dispose();
             invoke("terminal_close", { id }).catch(() => {});

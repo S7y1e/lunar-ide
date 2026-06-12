@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Editor as MonacoEditor } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
 import "./monaco-setup";
@@ -10,6 +10,7 @@ import { useFileContent } from "./use-file-content";
 import { pathToUri } from "./luau-lsp/uri";
 import { registerAutocompleteEnd } from "./luau-lsp/autocomplete-end";
 import { readSettings } from "../../../lib/settings";
+import { MONACO_THEME, getTheme, subscribeTheme } from "../../../lib/theme";
 
 type Props = {
     path: string | null;
@@ -18,6 +19,8 @@ type Props = {
 
 export default function EditorPane({ path, onDirtyChange }: Props) {
     const { content, setContent, save } = useFileContent(path);
+    const [theme, setTheme] = useState(getTheme());
+    useEffect(() => subscribeTheme(setTheme), []);
     const autocompleteEndEnabled = useRef(false);
     const onDirtyRef = useRef(onDirtyChange);
     onDirtyRef.current = onDirtyChange;
@@ -73,7 +76,7 @@ export default function EditorPane({ path, onDirtyChange }: Props) {
             path={pathToUri(path)}
             value={content}
             language={languageFor(name)}
-            theme="lunar-darcula"
+            theme={MONACO_THEME[theme]}
             onChange={(value) => handleChange(value ?? "")}
             options={EDITOR_OPTIONS}
             onMount={handleMount}

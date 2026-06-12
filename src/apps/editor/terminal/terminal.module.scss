@@ -4,7 +4,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: #191a1c;
+    background: $panel;
     border-radius: 8px;
     overflow: hidden;
 }
@@ -44,7 +44,7 @@
 
     &:hover {
         background: $hover;
-        color: #fff;
+        color: $text-bright;
     }
 }
 

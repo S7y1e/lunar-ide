@@ -12,11 +12,17 @@ const SIDECAR = "binaries/luau-lsp";
 
 export type DiagnosticsListener = (uri: string, diagnostics: LspDiagnostic[]) => void;
 
+export type SemanticTokensLegend = {
+    tokenTypes: string[];
+    tokenModifiers: string[];
+};
+
 export class LuauLspClient {
     private conn = new LspConnection();
     private versions = new Map<string, number>();
     private resolveReady!: () => void;
     private ready = new Promise<void>((resolve) => (this.resolveReady = resolve));
+    private semanticLegend: SemanticTokensLegend | null = null;
 
     onDiagnostics: DiagnosticsListener = () => {};
 
@@ -62,6 +68,13 @@ export class LuauLspClient {
             capabilities: clientCapabilities(),
         });
         console.log("[luau-lsp] initialized", result);
+
+        const provider = (result as {
+            capabilities?: {
+                semanticTokensProvider?: { legend?: SemanticTokensLegend };
+            };
+        })?.capabilities?.semanticTokensProvider;
+        this.semanticLegend = provider?.legend ?? null;
 
         this.conn.sendNotification("initialized", {});
         this.conn.sendNotification("workspace/didChangeConfiguration", {
@@ -132,6 +145,19 @@ export class LuauLspClient {
         });
     }
 
+    /** Legend reported by the server, needed to decode semantic token ids. */
+    semanticTokensLegend(): SemanticTokensLegend | null {
+        return this.semanticLegend;
+    }
+
+    async semanticTokensFull(uri: string): Promise<{ data: number[] } | null> {
+        await this.ready;
+        if (!this.semanticLegend) return null;
+        return this.conn.sendRequest("textDocument/semanticTokens/full", {
+            textDocument: { uri },
+        });
+    }
+
     async stop(): Promise<void> {
         try {
             await this.conn.sendRequest("shutdown");
@@ -155,6 +181,25 @@ function clientCapabilities() {
                 },
             },
             hover: { contentFormat: ["markdown", "plaintext"] },
+            semanticTokens: {
+                dynamicRegistration: false,
+                requests: { range: false, full: { delta: false } },
+                tokenTypes: [
+                    "namespace", "type", "class", "enum", "interface",
+                    "struct", "typeParameter", "parameter", "variable",
+                    "property", "enumMember", "event", "function", "method",
+                    "macro", "keyword", "modifier", "comment", "string",
+                    "number", "regexp", "operator", "decorator",
+                ],
+                tokenModifiers: [
+                    "declaration", "definition", "readonly", "static",
+                    "deprecated", "abstract", "async", "modification",
+                    "documentation", "defaultLibrary",
+                ],
+                formats: ["relative"],
+                overlappingTokenSupport: false,
+                multilineTokenSupport: false,
+            },
         },
         workspace: {
             configuration: true,

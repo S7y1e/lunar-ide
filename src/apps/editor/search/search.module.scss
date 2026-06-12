@@ -39,7 +39,7 @@
 
 .paletteTabActive {
     background: $hover;
-    color: #fff;
+    color: $text-bright;
 }
 
 .paletteInput {
@@ -88,6 +88,6 @@
 
 .paletteMark {
     background: transparent;
-    color: #e0a458;
+    color: $warning;
     font-weight: 600;
 }

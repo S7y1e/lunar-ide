@@ -1,7 +1,7 @@
-$accent: #6cb5ff;
-$muted: #888;
-$focus: #007bff;
-$surface: #2a2d31;
+@use "../editor/styles/vars" as *;
+
+// Home uses the brand color for headings/logo and the regular focus ring.
+$accent: $brand;
 
 .container {
     display: flex;
@@ -69,7 +69,7 @@ $surface: #2a2d31;
 }
 
 .recentHeading {
-    color: #e8e8e8;
+    color: $text-bright;
     font-size: 14px;
     font-weight: 500;
     margin: 0;
@@ -80,7 +80,7 @@ $surface: #2a2d31;
     flex-direction: column;
     gap: 8px;
     padding: 12px;
-    background: #1f2125;
+    background: $deep;
     border-radius: 10px;
 }
 
@@ -122,6 +122,6 @@ $surface: #2a2d31;
     border-radius: 4px;
 
     &:hover {
-        color: #fff;
+        color: $text-bright;
     }
 }

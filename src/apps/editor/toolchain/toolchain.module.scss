@@ -39,8 +39,8 @@
     align-items: center;
     gap: 6px;
     padding: 7px 12px;
-    background: rgba(224, 164, 88, 0.12);
-    color: #e0a458;
+    background: color-mix(in srgb, $warning 12%, transparent);
+    color: $warning;
     font-size: 12px;
     border-bottom: 1px solid $divider;
 }
@@ -248,7 +248,7 @@
 
     &:hover:not(:disabled) {
         background: $hover;
-        color: #fff;
+        color: $text-bright;
     }
 
     &:disabled {

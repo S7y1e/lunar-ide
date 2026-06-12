@@ -44,7 +44,7 @@
 }
 
 .running {
-    background: #5fb865;
+    background: $success;
 }
 
 .error {
@@ -100,7 +100,7 @@
     padding: 8px;
     border: none;
     border-radius: 6px;
-    color: #fff;
+    color: $text-bright;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;

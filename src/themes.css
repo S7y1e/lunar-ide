@@ -1,0 +1,77 @@
+/*
+ * Theme palettes.
+ *
+ * Every color used across the UI resolves to one of these tokens, so switching
+ * the `data-theme` attribute on <html> re-skins the whole app at runtime.
+ * Nord is the default; Dracula is available for anyone who prefers it.
+ *
+ * Tokens are also read from JS (Monaco editor + xterm terminal) via
+ * getComputedStyle, so keep the names in sync with src/lib/theme.ts.
+ */
+
+/* ---- Nord (default) ---- */
+:root,
+[data-theme="nord"] {
+    --bg-window: #2e3440;
+    --bg-chrome: #3b4252;
+    --bg-deep: #272c36;
+    --bar: #2b303b;
+    --menu: #434c5e;
+
+    --accent: #5e81ac;
+    --brand: #88c0d0;
+    --focus: #5e81ac;
+
+    --text: #d8dee9;
+    --text-bright: #eceff4;
+    --muted: #7b88a1;
+    --icon: #abb4c4;
+    --disabled: #4c566a;
+
+    --hover: #434c5e;
+    --selected: #3b4a63;
+    --selected-hover: #45587a;
+    --divider: #353b48;
+    --border: #272c36;
+
+    --danger: #bf616a;
+    --danger-hover: #43353a;
+    --close-danger: #bf616a;
+    --success: #a3be8c;
+    --warning: #ebcb8b;
+
+    --editor-fg: #d8dee9;
+}
+
+/* ---- Dracula ---- */
+[data-theme="dracula"] {
+    --bg-window: #282a36;
+    --bg-chrome: #2d2f3d;
+    --bg-deep: #21222c;
+    --bar: #21222c;
+    --menu: #343746;
+
+    --accent: #bd93f9;
+    --brand: #bd93f9;
+    --focus: #bd93f9;
+
+    --text: #f8f8f2;
+    --text-bright: #ffffff;
+    --muted: #6272a4;
+    --icon: #b9bcd0;
+    --disabled: #565872;
+
+    --hover: #44475a;
+    --selected: #44475a;
+    --selected-hover: #565970;
+    --divider: #383a4a;
+    --border: #21222c;
+
+    --danger: #ff5555;
+    --danger-hover: #45313a;
+    --close-danger: #ff5555;
+    --success: #50fa7b;
+    --warning: #ffb86c;
+
+    --editor-fg: #f8f8f2;
+}

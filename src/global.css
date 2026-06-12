@@ -3,11 +3,7 @@
 @import "@fontsource/inter/600.css";
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/500.css";
-
-:root {
-    --bg-window: #191a1c;
-    --bg-chrome: #26282c;
-}
+@import "./themes.css";
 
 html,
 body,

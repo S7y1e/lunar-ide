@@ -78,6 +78,27 @@ export function registerLuauLsp(client: LuauLspClient): () => void {
                 },
             })
         );
+
+        disposables.push(
+            monaco.languages.registerDocumentSemanticTokensProvider(language, {
+                getLegend() {
+                    return (
+                        client.semanticTokensLegend() ?? {
+                            tokenTypes: [],
+                            tokenModifiers: [],
+                        }
+                    );
+                },
+                async provideDocumentSemanticTokens(model) {
+                    const result = await client.semanticTokensFull(
+                        model.uri.toString()
+                    );
+                    if (!result?.data) return null;
+                    return { data: new Uint32Array(result.data) };
+                },
+                releaseDocumentSemanticTokens() {},
+            })
+        );
     }
 
     return () => disposables.forEach((d) => d.dispose());

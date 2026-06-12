@@ -2,6 +2,7 @@ import type * as monaco from "monaco-editor";
 
 export const EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
     minimap: { enabled: false },
+    "semanticHighlighting.enabled": true,
     fontSize: 13,
     fontFamily: "'JetBrains Mono', monospace",
     fontLigatures: true,
