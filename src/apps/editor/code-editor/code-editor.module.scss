@@ -94,3 +94,71 @@
     color: $muted;
     font-size: 13px;
 }
+
+.paneRoot {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.paneEditor {
+    flex: 1;
+    min-height: 0;
+}
+
+.conflictBanner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+    padding: 6px 12px;
+    background: $panel;
+    border-bottom: 1px solid $divider;
+    border-left: 2px solid $accent;
+    font-size: 12px;
+    color: $text;
+}
+
+.conflictText {
+    color: $muted;
+}
+
+.conflictActions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.conflictReload,
+.conflictKeep {
+    padding: 3px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid $divider;
+    background: transparent;
+    color: $text;
+
+    &:hover {
+        background: $hover;
+    }
+}
+
+.conflictReload {
+    border-color: $accent;
+    color: $accent;
+}
+
+.saveErrorBanner {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    background: rgba(220, 80, 80, 0.12);
+    border-bottom: 1px solid rgba(220, 80, 80, 0.4);
+    border-left: 2px solid #dc5050;
+    color: #ff9b9b;
+    font-size: 12px;
+    font-family: monospace;
+    word-break: break-word;
+}

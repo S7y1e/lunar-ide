@@ -9,6 +9,10 @@
     "fs:allow-applocaldata-read",
     "fs:allow-applocaldata-write",
     {
+      "identifier": "fs:allow-exists",
+      "allow": [{ "path": "**" }]
+    },
+    {
       "identifier": "fs:allow-read-text-file",
       "allow": [{ "path": "**" }]
     },

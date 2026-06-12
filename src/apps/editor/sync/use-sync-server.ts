@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Command, Child } from "@tauri-apps/plugin-shell";
+import { invoke } from "@tauri-apps/api/core";
 import { readSettings } from "../../../lib/settings";
 
 export type SyncBackend = "rojo" | "argon";
@@ -90,6 +91,13 @@ export function useSyncServer(rootPath: string) {
                 setStatus("stopped");
             });
             childRef.current = await command.spawn();
+            // Tie the sidecar to the app's lifetime so an abrupt exit (Ctrl+C,
+            // crash) can't leave it orphaned holding the port. Best-effort.
+            if (typeof childRef.current.pid === "number") {
+                invoke("assign_to_job", { pid: childRef.current.pid }).catch(
+                    () => {}
+                );
+            }
         } catch (error) {
             append(String(error));
             setStatus("error");

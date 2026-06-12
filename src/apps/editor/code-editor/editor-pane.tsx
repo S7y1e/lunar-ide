@@ -18,7 +18,16 @@ type Props = {
 };
 
 export default function EditorPane({ path, onDirtyChange }: Props) {
-    const { content, setContent, save, isDirty } = useFileContent(path);
+    const {
+        content,
+        setContent,
+        save,
+        saveError,
+        isDirty,
+        externalChange,
+        reloadFromDisk,
+        keepMine,
+    } = useFileContent(path);
     const [theme, setTheme] = useState(getTheme());
     useEffect(() => subscribeTheme(setTheme), []);
     const autocompleteEndEnabled = useRef(false);
@@ -62,14 +71,45 @@ export default function EditorPane({ path, onDirtyChange }: Props) {
     const name = path.split(/[\\/]/).pop() ?? path;
 
     return (
-        <MonacoEditor
-            path={pathToUri(path)}
-            value={content}
-            language={languageFor(name)}
-            theme={MONACO_THEME[theme]}
-            onChange={(value) => handleChange(value ?? "")}
-            options={EDITOR_OPTIONS}
-            onMount={handleMount}
-        />
+        <div className={styles.paneRoot}>
+            {saveError && (
+                <div className={styles.saveErrorBanner}>
+                    Save failed: {saveError}
+                </div>
+            )}
+            {externalChange && (
+                <div className={styles.conflictBanner}>
+                    <span className={styles.conflictText}>
+                        This file changed on disk
+                        {isDirty ? " (you have unsaved edits)" : ""}.
+                    </span>
+                    <div className={styles.conflictActions}>
+                        <button
+                            className={styles.conflictReload}
+                            onClick={reloadFromDisk}
+                        >
+                            Reload
+                        </button>
+                        <button
+                            className={styles.conflictKeep}
+                            onClick={keepMine}
+                        >
+                            Keep mine
+                        </button>
+                    </div>
+                </div>
+            )}
+            <div className={styles.paneEditor}>
+                <MonacoEditor
+                    path={pathToUri(path)}
+                    value={content}
+                    language={languageFor(name)}
+                    theme={MONACO_THEME[theme]}
+                    onChange={(value) => handleChange(value ?? "")}
+                    options={EDITOR_OPTIONS}
+                    onMount={handleMount}
+                />
+            </div>
+        </div>
     );
 }
