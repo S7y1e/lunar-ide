@@ -7,10 +7,17 @@ type Props = {
     projects: RecentProject[];
     onOpenProject: (path: string) => void;
     onOpenFolder: () => void;
+    onNewProject: () => void;
     onRemove: (path: string) => void;
 };
 
-export default function Home({ projects, onOpenProject, onOpenFolder, onRemove }: Props) {
+export default function Home({
+    projects,
+    onOpenProject,
+    onOpenFolder,
+    onNewProject,
+    onRemove,
+}: Props) {
     return (
         <div className={styles.container}>
             <h1 className={styles.title}>Welcome to Lunar</h1>
@@ -18,7 +25,7 @@ export default function Home({ projects, onOpenProject, onOpenFolder, onRemove }
                 Personal Roblox game development IDE
             </p>
 
-            <MainCard onOpen={onOpenFolder} />
+            <MainCard onOpen={onOpenFolder} onCreate={onNewProject} />
             <RecentProjects
                 projects={projects}
                 onOpen={onOpenProject}

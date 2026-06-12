@@ -6,14 +6,18 @@ import {
     getRecentProjectsFile,
     removeRecentProjectFromList,
     selectFolder,
+    createProject,
+    NewProjectOptions,
     RecentProject,
 } from "./lib/projects";
-import {readDir} from "@tauri-apps/plugin-fs";
+import NewProjectDialog from "./apps/home/new-project-dialog";
+import {exists, readDir} from "@tauri-apps/plugin-fs";
 
 export default function App() {
     const [screen, setScreen] = useState<"home" | "editor">("home");
     const [currentPath, setCurrentPath] = useState<string | null>(null);
     const [projects, setProjects] = useState<RecentProject[]>([]);
+    const [showNewProject, setShowNewProject] = useState(false);
 
     const loadProjects = () => {
         getRecentProjectsFile().then(setProjects);
@@ -28,11 +32,31 @@ export default function App() {
         setScreen("editor");
     };
 
+    // Opening from the recent list: the folder may have been deleted or moved
+    // since it was saved, so verify it still exists before switching screens.
+    const openRecent = async (path: string) => {
+        if (!(await exists(path))) {
+            await removeRecentProjectFromList(path);
+            loadProjects();
+            return;
+        }
+        openProject(path);
+    };
+
     const openFolder = async () => {
         const path = await selectFolder();
         if (path) {
             loadProjects();
             readDir(path);
+            openProject(path);
+        }
+    };
+
+    const newProject = async (options: NewProjectOptions) => {
+        setShowNewProject(false);
+        const path = await createProject(options);
+        if (path) {
+            loadProjects();
             openProject(path);
         }
     };
@@ -53,7 +77,7 @@ export default function App() {
             <TopBar
                 projects={projects}
                 onOpenFolder={openFolder}
-                onOpenRecent={openProject}
+                onOpenRecent={openRecent}
                 onCloseProject={closeProject}
                 hasProject={screen === "editor"}
             />
@@ -62,9 +86,16 @@ export default function App() {
             ) : (
                 <Home
                     projects={projects}
-                    onOpenProject={openProject}
+                    onOpenProject={openRecent}
                     onOpenFolder={openFolder}
+                    onNewProject={() => setShowNewProject(true)}
                     onRemove={removeProject}
+                />
+            )}
+            {showNewProject && (
+                <NewProjectDialog
+                    onCreate={newProject}
+                    onCancel={() => setShowNewProject(false)}
                 />
             )}
         </>

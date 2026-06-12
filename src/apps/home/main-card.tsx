@@ -4,15 +4,16 @@ import React from "react";
 
 type Props = {
     onOpen: React.MouseEventHandler;
+    onCreate: React.MouseEventHandler;
 };
 
-export default function MainCard({ onOpen }: Props) {
+export default function MainCard({ onOpen, onCreate }: Props) {
     return (
         <div className={styles.cards}>
             <MainCardButton
                 title="+ Create New Game"
                 description="Start a fresh project with a ready-to-use template"
-                clicked={() => {}}
+                clicked={onCreate}
             />
             <MainCardButton
                 title="Open Existing Project"
