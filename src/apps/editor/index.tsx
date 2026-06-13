@@ -111,7 +111,15 @@ export default function Editor({ path }: Props) {
             } catch (e) {
                 console.error("sync stop on close failed", e);
             }
-            await win.destroy();
+            // destroy() bypasses onCloseRequested (close() would re-enter this
+            // handler and loop). If destroy ever fails, fall back to close() so
+            // a single failure can't permanently trap the window open.
+            try {
+                await win.destroy();
+            } catch (e) {
+                console.error("window destroy failed, falling back to close", e);
+                await win.close();
+            }
         }).then((fn) => {
             unlisten = fn;
         });
