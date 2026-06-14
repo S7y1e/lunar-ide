@@ -1,4 +1,5 @@
 mod process_guard;
+mod project;
 mod terminal;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -9,12 +10,17 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .manage(terminal::TerminalState::default())
         .manage(process_guard::JobGuard::new())
+        .manage(project::ProjectStore::default())
         .invoke_handler(tauri::generate_handler![
             terminal::terminal_open,
             terminal::terminal_write,
             terminal::terminal_resize,
             terminal::terminal_close,
-            process_guard::assign_to_job
+            process_guard::assign_to_job,
+            project::project_open,
+            project::project_close,
+            project::project_snapshot,
+            project::project_data_model
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

@@ -1,6 +1,7 @@
 import { IoSyncOutline } from "react-icons/io5";
 import styles from "./status-bar.module.scss";
 import { SyncStatus, SyncBackend } from "../sync/use-sync-server";
+import { useProject } from "../../../lib/project";
 
 type CursorPosition = { line: number; column: number };
 
@@ -24,6 +25,7 @@ export default function StatusBar({
     cursor,
     onClick,
 }: Props) {
+    const project = useProject();
     const label =
         status === "running"
             ? `${BACKEND_LABEL[backend]} · :${port}`
@@ -38,6 +40,11 @@ export default function StatusBar({
 
     return (
         <footer className={styles.statusBar}>
+            {project && (
+                <span className={styles.project} title={project.root}>
+                    {project.name}
+                </span>
+            )}
             <button
                 className={`${styles.item} ${styles[status]}`}
                 onClick={onClick}

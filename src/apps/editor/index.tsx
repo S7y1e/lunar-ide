@@ -14,6 +14,7 @@ import EditorTabs from "./code-editor/editor-tabs";
 import EditorPane from "./code-editor/editor-pane";
 import { useOpenFiles } from "./code-editor/use-open-files";
 import { useLuauLsp } from "./code-editor/luau-lsp/use-luau-lsp";
+import { useSourcemap } from "./code-editor/luau-lsp/use-sourcemap";
 import { pathToUri } from "./code-editor/luau-lsp/uri";
 import SyncPanel from "./sync/sync-panel";
 import { useSyncServer } from "./sync/use-sync-server";
@@ -23,12 +24,21 @@ import TerminalView from "./terminal/terminal-view";
 import { useTerminalPanel } from "./terminal/use-terminal-panel";
 import SettingsView from "./settings/settings-view";
 import StatusBar from "./status-bar/status-bar";
+import { ProjectProvider } from "../../lib/project";
 
 type Props = {
     path: string;
 };
 
 export default function Editor({ path }: Props) {
+    return (
+        <ProjectProvider root={path}>
+            <EditorBody path={path} />
+        </ProjectProvider>
+    );
+}
+
+function EditorBody({ path }: Props) {
     const { currentView, toggleView } = useActivityView();
     const sidebarRef = useSidebarPanel(currentView);
     const palette = useCommandPalette();
@@ -37,6 +47,7 @@ export default function Editor({ path }: Props) {
     const toolchain = useRokit(path);
     const terminal = useTerminalPanel();
 
+    useSourcemap(path);
     useLuauLsp(path);
     const {
         openFiles,
