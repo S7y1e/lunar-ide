@@ -102,6 +102,12 @@ export function useSyncServer(rootPath: string) {
         try {
             if (backend === "argon") {
                 await applyArgonConfig(rootPath, append);
+                // Lunar owns the sourcemap end to end (a dedicated
+                // `argon sourcemap --watch`, see use-sourcemap), so the serve
+                // process must not also generate it — two writers race on the
+                // same file. Turn off argon's serve-side sourcemap.
+                append("Lunar owns the sourcemap; disabling argon serve with_sourcemap.");
+                await runArgonConfig("with_sourcemap", "false", rootPath);
             }
             const command = Command.sidecar(
                 SIDECAR[backend],

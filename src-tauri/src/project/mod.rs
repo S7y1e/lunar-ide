@@ -106,8 +106,21 @@ impl ProjectModel {
             root: self.root.to_string_lossy().into_owned(),
             name: self.name.clone(),
             project_file: self.project_file.clone(),
-            sync_backend: self.manifest.sync.backend.clone(),
+            sync_backend: self.sync_backend(),
         }
+    }
+
+    /// The sync backend the project should use. The manifest wins when it pins
+    /// one; otherwise we fall back to detecting an `argon.toml` so existing Argon
+    /// projects (predating lunar.toml) get Argon-aware behavior without a
+    /// manifest. None means "no signal" and the frontend default (rojo) applies.
+    fn sync_backend(&self) -> Option<String> {
+        self.manifest.sync.backend.clone().or_else(|| {
+            self.root
+                .join("argon.toml")
+                .exists()
+                .then(|| "argon".to_string())
+        })
     }
 }
 

@@ -6,20 +6,35 @@ import { join } from "@tauri-apps/api/path";
 import { readSettings } from "../../../../lib/settings";
 import { getProjectSnapshot } from "../../../../lib/project";
 
-const SIDECAR = "binaries/rojo";
-
 function setting<T>(values: Record<string, unknown>, key: string, fallback: T): T {
     return key in values ? (values[key] as T) : fallback;
 }
 
+// The sourcemap generator follows the project's declared backend, not a fixed
+// tool: an Argon project's sourcemap is maintained by Argon (which also manages
+// its project file), a Rojo project's by Rojo. Same on-disk sourcemap.json,
+// owned end to end by Lunar either way.
+function generator(backend: string, projectFile: string, sourcemapFile: string, includeNonScripts: boolean) {
+    if (backend === "argon") {
+        const args = ["sourcemap", projectFile, "--output", sourcemapFile, "--watch", "--yes", "--color", "never"];
+        if (includeNonScripts) args.push("--non-scripts");
+        return { sidecar: "binaries/argon", args };
+    }
+    const args = ["sourcemap", projectFile, "--output", sourcemapFile, "--watch"];
+    if (includeNonScripts) args.push("--include-non-scripts");
+    return { sidecar: "binaries/rojo", args };
+}
+
 /**
- * Lunar owns sourcemap generation: it runs its own `rojo sourcemap --watch` for
- * the lifetime of the open project, keeping `sourcemap.json` fresh on disk. The
- * Rust Project Model parses that file (`project_data_model`) and luau-lsp
- * consumes it — luau-lsp's own autogenerate is forced off (see config.ts) so the
- * two never race writing the same file.
+ * Lunar owns sourcemap generation: it runs its own `<backend> sourcemap --watch`
+ * for the lifetime of the open project, keeping `sourcemap.json` fresh on disk.
+ * The generator follows the manifest's sync backend (rojo/argon) so it agrees
+ * with whoever manages the project file. The Rust Project Model parses that file
+ * (`project_data_model`) and luau-lsp consumes it — luau-lsp's autogenerate is
+ * forced off (config.ts), and on Argon the serve-side sourcemap is disabled (see
+ * use-sync-server) so there's a single writer.
  *
- * No-op for a plain folder with no Rojo project file; nothing to generate there.
+ * No-op for a plain folder with no project file; nothing to generate there.
  */
 export function useSourcemap(rootPath: string) {
     useEffect(() => {
@@ -51,16 +66,15 @@ export function useSourcemap(rootPath: string) {
             if (!(await exists(await join(rootPath, projectFile)))) return;
             if (stopped) return;
 
-            const args = [
-                "sourcemap",
+            const backend = snapshot?.syncBackend === "argon" ? "argon" : "rojo";
+            const { sidecar, args } = generator(
+                backend,
                 projectFile,
-                "--output",
                 sourcemapFile,
-                "--watch",
-            ];
-            if (includeNonScripts) args.push("--include-non-scripts");
+                includeNonScripts,
+            );
 
-            const command = Command.sidecar(SIDECAR, args, { cwd: rootPath });
+            const command = Command.sidecar(sidecar, args, { cwd: rootPath });
             command.stderr.on("data", (line) =>
                 console.warn("[sourcemap]", line),
             );
