@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Command, Child } from "@tauri-apps/plugin-shell";
 import { invoke } from "@tauri-apps/api/core";
 import { readSettings } from "../../../lib/settings";
+import { useProject } from "../../../lib/project";
 
 export type SyncBackend = "rojo" | "argon";
 export type SyncStatus = "stopped" | "running" | "error";
@@ -52,6 +53,7 @@ async function applyArgonConfig(
 }
 
 export function useSyncServer(rootPath: string) {
+    const project = useProject();
     const [backend, setBackendState] = useState<SyncBackend>("rojo");
     const [status, setStatus] = useState<SyncStatus>("stopped");
     const [logs, setLogs] = useState<string[]>([]);
@@ -81,6 +83,16 @@ export function useSyncServer(rootPath: string) {
         setBackendState(next);
         setPort(DEFAULT_PORT[next]);
     };
+
+    // Adopt the backend the project's manifest pins, once the model reports it.
+    // Only while stopped, so a running server (or a user override) is left be.
+    const manifestBackend = project?.syncBackend;
+    useEffect(() => {
+        if (manifestBackend !== "rojo" && manifestBackend !== "argon") return;
+        if (childRef.current) return;
+        setBackendState(manifestBackend);
+        setPort(DEFAULT_PORT[manifestBackend]);
+    }, [manifestBackend]);
 
     const start = async () => {
         if (childRef.current) return;

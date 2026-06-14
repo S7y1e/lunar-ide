@@ -13,6 +13,8 @@ export type ProjectSnapshot = {
     root: string;
     name: string;
     projectFile: string;
+    /** Sync backend pinned by lunar.toml, or null to use the frontend default. */
+    syncBackend: string | null;
 };
 
 export function openProject(root: string): Promise<ProjectSnapshot> {

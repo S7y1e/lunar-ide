@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { exists } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
 import { readSettings } from "../../../../lib/settings";
+import { getProjectSnapshot } from "../../../../lib/project";
 
 const SIDECAR = "binaries/rojo";
 
@@ -26,15 +27,16 @@ export function useSourcemap(rootPath: string) {
         let stopped = false;
 
         (async () => {
-            const values = await readSettings();
+            const [values, snapshot] = await Promise.all([
+                readSettings(),
+                getProjectSnapshot(),
+            ]);
             if (stopped) return;
             if (!setting(values, "luau-lsp.sourcemap.enabled", true)) return;
 
-            const projectFile = setting(
-                values,
-                "luau-lsp.sourcemap.rojoProjectFile",
-                "default.project.json",
-            );
+            // The project file is owned by the model (manifest-driven), not the
+            // luau-lsp settings — so the generator and luau-lsp agree on it.
+            const projectFile = snapshot?.projectFile ?? "default.project.json";
             const sourcemapFile = setting(
                 values,
                 "luau-lsp.sourcemap.sourcemapFile",

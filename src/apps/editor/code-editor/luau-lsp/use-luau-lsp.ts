@@ -5,6 +5,7 @@ import { registerLuauLsp } from "./monaco-bridge";
 import { buildConfigRoot } from "./config";
 import { pathToUri } from "./uri";
 import { readSettings, subscribeSettings, SettingsValues } from "../../../../lib/settings";
+import { getProjectSnapshot } from "../../../../lib/project";
 
 const DEFINITIONS_RESOURCE = "resources/globalTypes.PluginSecurity.d.luau";
 
@@ -33,15 +34,29 @@ export function useLuauLsp(rootPath: string) {
         });
 
         (async () => {
-            const [values, definitions] = await Promise.all([
+            const [values, definitions, snapshot] = await Promise.all([
                 readSettings(),
                 resolveDefinitions(),
+                getProjectSnapshot(),
             ]);
             if (stopped) return;
             currentValues = values;
+            // Layer the model's manifest over global settings: the project file
+            // is owned by lunar.toml, so luau-lsp resolves requires against the
+            // same DataModel our sourcemap generator targets.
+            const projectFile = snapshot?.projectFile;
+            const getConfig = () =>
+                buildConfigRoot(
+                    projectFile
+                        ? {
+                              ...currentValues,
+                              "luau-lsp.sourcemap.rojoProjectFile": projectFile,
+                          }
+                        : currentValues,
+                );
             client = new LuauLspClient(
                 pathToUri(rootPath),
-                () => buildConfigRoot(currentValues),
+                getConfig,
                 definitions
             );
             dispose = registerLuauLsp(client);
