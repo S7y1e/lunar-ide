@@ -22,6 +22,7 @@ import { useRokit } from "./toolchain/use-rokit";
 import TerminalView from "./terminal/terminal-view";
 import { useTerminalPanel } from "./terminal/use-terminal-panel";
 import SettingsView from "./settings/settings-view";
+import StatusBar from "./status-bar/status-bar";
 
 type Props = {
     path: string;
@@ -49,16 +50,25 @@ export default function Editor({ path }: Props) {
     // Track which files have unsaved changes
     const [dirtyFiles, setDirtyFiles] = useState<Set<string>>(new Set());
 
-    const handleDirtyChange = useCallback((filePath: string, dirty: boolean) => {
-        setDirtyFiles((prev) => {
-            const hasDirty = prev.has(filePath);
-            if (dirty === hasDirty) return prev;
-            const next = new Set(prev);
-            if (dirty) next.add(filePath);
-            else next.delete(filePath);
-            return next;
-        });
-    }, []);
+    // Cursor position from the active editor, shown in the status bar.
+    const [cursor, setCursor] = useState<{
+        line: number;
+        column: number;
+    } | null>(null);
+
+    const handleDirtyChange = useCallback(
+        (filePath: string, dirty: boolean) => {
+            setDirtyFiles((prev) => {
+                const hasDirty = prev.has(filePath);
+                if (dirty === hasDirty) return prev;
+                const next = new Set(prev);
+                if (dirty) next.add(filePath);
+                else next.delete(filePath);
+                return next;
+            });
+        },
+        [],
+    );
 
     // Save only files the user actually edited. Writing every open model is
     // dangerous: a model that failed to load (or never loaded) holds "" and
@@ -71,7 +81,7 @@ export default function Editor({ path }: Props) {
         await Promise.all(
             [...dirtyFilesRef.current].map(async (filePath) => {
                 const model = monaco.editor.getModel(
-                    monaco.Uri.parse(pathToUri(filePath))
+                    monaco.Uri.parse(pathToUri(filePath)),
                 );
                 if (!model) return;
                 try {
@@ -80,7 +90,7 @@ export default function Editor({ path }: Props) {
                     // Don't let one failed write abort saving the others.
                     console.error("failed to save", filePath, e);
                 }
-            })
+            }),
         );
     }, []);
 
@@ -117,7 +127,10 @@ export default function Editor({ path }: Props) {
             try {
                 await win.destroy();
             } catch (e) {
-                console.error("window destroy failed, falling back to close", e);
+                console.error(
+                    "window destroy failed, falling back to close",
+                    e,
+                );
                 await win.close();
             }
         }).then((fn) => {
@@ -128,96 +141,113 @@ export default function Editor({ path }: Props) {
 
     return (
         <div className={styles.editor}>
-            <ActivityBar
-                active={currentView}
-                onSelect={toggleView}
-                terminalOpen={terminal.open}
-                onToggleTerminal={terminal.toggle}
-                onOpenSettings={() => setSettingsOpen(true)}
-            />
+            <div className={styles.body}>
+                <ActivityBar
+                    active={currentView}
+                    onSelect={toggleView}
+                    terminalOpen={terminal.open}
+                    onToggleTerminal={terminal.toggle}
+                    onOpenSettings={() => setSettingsOpen(true)}
+                />
 
-            <Group
-                orientation="horizontal"
-                className={styles.panels}
-                resizeTargetMinimumSize={{ coarse: 20, fine: 12 }}
-            >
-                <Panel
-                    panelRef={sidebarRef}
-                    collapsible
-                    collapsedSize={0}
-                    defaultSize="260px"
-                    minSize="180px"
+                <Group
+                    orientation="horizontal"
+                    className={styles.panels}
+                    resizeTargetMinimumSize={{ coarse: 20, fine: 12 }}
                 >
-                    {currentView === "sync" ? (
-                        <SyncPanel
-                            backend={sync.backend}
-                            onBackendChange={sync.setBackend}
-                            status={sync.status}
-                            logs={sync.logs}
-                            port={sync.port}
-                            onPortChange={sync.setPort}
-                            onStart={sync.start}
-                            onStop={sync.stop}
-                        />
-                    ) : currentView === "toolchain" ? (
-                        <ToolchainPanel
-                            tools={toolchain.tools}
-                            hasManifest={toolchain.hasManifest}
-                            busy={toolchain.busy}
-                            logs={toolchain.logs}
-                            onInstall={toolchain.install}
-                            onUpdate={toolchain.update}
-                            onInit={toolchain.init}
-                            onAdd={toolchain.add}
-                            onRemove={toolchain.remove}
-                            onSetVersion={toolchain.setVersion}
-                        />
-                    ) : (
-                        <Sidebar
-                            currentView={currentView}
-                            path={path}
-                            onOpenFile={openFile}
-                        />
-                    )}
-                </Panel>
-
-                {currentView && <Separator className={styles.handle} />}
-
-                <Panel className={styles.main}>
-                    <Group orientation="vertical" className={styles.mainGroup}>
-                        <Panel className={styles.editorPane}>
-                            <EditorTabs
-                                files={openFiles}
-                                active={activeFile}
-                                dirtyFiles={dirtyFiles}
-                                onSelect={setActiveFile}
-                                onClose={closeFile}
-                                onReorder={reorderFiles}
+                    <Panel
+                        panelRef={sidebarRef}
+                        collapsible
+                        collapsedSize={0}
+                        defaultSize="260px"
+                        minSize="180px"
+                    >
+                        {currentView === "sync" ? (
+                            <SyncPanel
+                                backend={sync.backend}
+                                onBackendChange={sync.setBackend}
+                                status={sync.status}
+                                logs={sync.logs}
+                                port={sync.port}
+                                onPortChange={sync.setPort}
+                                onStart={sync.start}
+                                onStop={sync.stop}
                             />
-                            <div className={styles.editorArea}>
-                                <EditorPane
-                                    path={activeFile}
-                                    onDirtyChange={handleDirtyChange}
-                                />
-                            </div>
-                        </Panel>
-
-                        {terminal.open && (
-                            <Separator className={styles.vHandle} />
+                        ) : currentView === "toolchain" ? (
+                            <ToolchainPanel
+                                tools={toolchain.tools}
+                                hasManifest={toolchain.hasManifest}
+                                busy={toolchain.busy}
+                                logs={toolchain.logs}
+                                onInstall={toolchain.install}
+                                onUpdate={toolchain.update}
+                                onInit={toolchain.init}
+                                onAdd={toolchain.add}
+                                onRemove={toolchain.remove}
+                                onSetVersion={toolchain.setVersion}
+                            />
+                        ) : (
+                            <Sidebar
+                                currentView={currentView}
+                                path={path}
+                                onOpenFile={openFile}
+                            />
                         )}
+                    </Panel>
 
-                        <Panel
-                            panelRef={terminal.ref}
-                            collapsible
-                            collapsedSize={0}
-                            defaultSize="30%"
-                            minSize="20%"
+                    {currentView && <Separator className={styles.handle} />}
+
+                    <Panel className={styles.main}>
+                        <Group
+                            orientation="vertical"
+                            className={styles.mainGroup}
                         >
-                            <TerminalView cwd={path} onClose={terminal.close} />
-                        </Panel>
-                    </Group>
-                </Panel>
-            </Group>
+                            <Panel className={styles.editorPane}>
+                                <EditorTabs
+                                    files={openFiles}
+                                    active={activeFile}
+                                    dirtyFiles={dirtyFiles}
+                                    onSelect={setActiveFile}
+                                    onClose={closeFile}
+                                    onReorder={reorderFiles}
+                                />
+                                <div className={styles.editorArea}>
+                                    <EditorPane
+                                        path={activeFile}
+                                        onDirtyChange={handleDirtyChange}
+                                        onCursorChange={setCursor}
+                                    />
+                                </div>
+                            </Panel>
+
+                            {terminal.open && (
+                                <Separator className={styles.vHandle} />
+                            )}
+
+                            <Panel
+                                panelRef={terminal.ref}
+                                collapsible
+                                collapsedSize={0}
+                                defaultSize="30%"
+                                minSize="20%"
+                            >
+                                <TerminalView
+                                    cwd={path}
+                                    onClose={terminal.close}
+                                />
+                            </Panel>
+                        </Group>
+                    </Panel>
+                </Group>
+            </div>
+
+            <StatusBar
+                status={sync.status}
+                backend={sync.backend}
+                port={sync.port}
+                cursor={cursor}
+                onClick={() => toggleView("sync")}
+            />
 
             {palette.isOpen && (
                 <SearchPalette
