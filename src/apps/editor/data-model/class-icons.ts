@@ -15,6 +15,8 @@ import {
     VscSymbolVariable,
 } from "react-icons/vsc";
 
+export type ClassIcon = { Icon: IconType; color: string };
+
 // Specific classes worth their own glyph. Everything else falls back by suffix.
 const BY_CLASS: Record<string, IconType> = {
     DataModel: VscGlobe,
@@ -35,18 +37,39 @@ const BY_CLASS: Record<string, IconType> = {
     Frame: VscWindow,
 };
 
-/**
- * An icon for a DataModel instance, keyed off its Roblox class. Specific classes
- * get their own glyph; the rest fall back by name suffix, then to a generic
- * instance icon. Coarse on purpose — can grow into true per-class Roblox icons.
- */
-export function iconForClass(className: string): IconType {
+function glyph(className: string): IconType {
     const specific = BY_CLASS[className];
     if (specific) return specific;
-
-    if (className.endsWith("Script")) return VscFileCode; // Script, LocalScript
+    if (className.endsWith("Script")) return VscFileCode;
     if (className.endsWith("Event") || className.endsWith("Function"))
         return VscSymbolEvent;
     if (className.endsWith("Value")) return VscSymbolVariable;
     return VscSymbolNamespace;
+}
+
+// Theme-aware accents (resolve per Nord/Dracula). Kept few and meaningful, like
+// JetBrains icon coloring: scripts pop, folders stay neutral.
+function tint(className: string): string {
+    switch (className) {
+        case "DataModel":
+            return "var(--success)";
+        case "Folder":
+            return "var(--icon)";
+        case "ModuleScript":
+            return "var(--warning)";
+        case "Script":
+            return "var(--success)";
+        case "LocalScript":
+            return "var(--brand)";
+    }
+    if (className.endsWith("Script")) return "var(--accent)";
+    if (className.endsWith("Event") || className.endsWith("Function"))
+        return "var(--warning)";
+    if (className.endsWith("Value")) return "var(--muted)";
+    return "var(--accent)";
+}
+
+/** Icon + theme-aware color for a DataModel instance, keyed off its class. */
+export function iconForClass(className: string): ClassIcon {
+    return { Icon: glyph(className), color: tint(className) };
 }

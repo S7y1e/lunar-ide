@@ -1,4 +1,10 @@
-import { VscChevronDown, VscRefresh, VscArrowRight, VscArrowLeft } from "react-icons/vsc";
+import {
+    VscChevronDown,
+    VscRefresh,
+    VscArrowRight,
+    VscArrowLeft,
+    VscSymbolMethod,
+} from "react-icons/vsc";
 import { join } from "@tauri-apps/api/path";
 import { useDependencies } from "./use-dependencies";
 import { toRelative } from "../data-model/instance-path";
@@ -36,6 +42,7 @@ export default function DependenciesPanel({ root, activeFile, onOpenFile }: Prop
             onClick={() => open(relFile)}
             title={relFile}
         >
+            <VscSymbolMethod className={styles.rowIcon} />
             <span className={styles.name}>{baseName(relFile)}</span>
             <span className={styles.path}>{relFile}</span>
         </button>

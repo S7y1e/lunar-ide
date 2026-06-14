@@ -43,7 +43,8 @@ export default function DataModelTreeNode({
     const isSelected = selected === key;
     const hasChildren = node.children.length > 0;
     const source = scriptPath(node);
-    const Icon = iconForClass(node.className);
+    const { Icon, color } = iconForClass(node.className);
+    const showClass = node.className !== node.name;
 
     const rowRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
@@ -78,11 +79,15 @@ export default function DataModelTreeNode({
             <div
                 ref={rowRef}
                 className={`${styles.treeRow} ${isSelected ? styles.selected : ""}`}
-                style={{ paddingLeft: depth * 12 + 8 }}
                 onClick={handleClick}
                 onContextMenu={handleContext}
                 title={node.className}
             >
+                <span
+                    className={styles.indent}
+                    style={{ width: depth * 12 }}
+                />
+
                 {hasChildren ? (
                     <VscChevronRight
                         className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ""}`}
@@ -92,8 +97,11 @@ export default function DataModelTreeNode({
                     <span className={styles.chevronSpacer} />
                 )}
 
-                <Icon className={styles.icon} />
+                <Icon className={styles.icon} style={{ color }} />
                 <span className={styles.nodeName}>{node.name}</span>
+                {showClass && (
+                    <span className={styles.className}>{node.className}</span>
+                )}
             </div>
 
             {isOpen &&
