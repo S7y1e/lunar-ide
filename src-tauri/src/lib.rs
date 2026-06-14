@@ -20,7 +20,8 @@ pub fn run() {
             project::project_open,
             project::project_close,
             project::project_snapshot,
-            project::project_data_model
+            project::project_data_model,
+            project::dependencies::project_dependencies
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

@@ -15,6 +15,8 @@ use std::sync::Mutex;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, State};
 
+pub mod dependencies;
+
 /// The Rojo project file we look at to name the project. Phase 0.3 will let the
 /// per-project manifest override this; for now it is the Rojo default.
 const DEFAULT_PROJECT_FILE: &str = "default.project.json";

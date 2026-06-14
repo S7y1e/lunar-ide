@@ -1,9 +1,14 @@
 import { IconType } from "react-icons";
 import { FaRegFolder } from "react-icons/fa";
 import { IoSyncOutline } from "react-icons/io5";
-import { VscTools, VscListTree } from "react-icons/vsc";
+import { VscTools, VscListTree, VscReferences } from "react-icons/vsc";
 
-export type ActivityViewId = "project" | "datamodel" | "sync" | "toolchain";
+export type ActivityViewId =
+    | "project"
+    | "datamodel"
+    | "deps"
+    | "sync"
+    | "toolchain";
 
 export type ActivityView = {
     id: ActivityViewId;
@@ -21,6 +26,11 @@ export const ACTIVITY_VIEWS: ActivityView[] = [
         id: "datamodel",
         label: "DataModel",
         icon: VscListTree,
+    },
+    {
+        id: "deps",
+        label: "Dependencies",
+        icon: VscReferences,
     },
     {
         id: "sync",

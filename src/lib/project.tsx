@@ -46,6 +46,22 @@ export function getProjectDataModel(): Promise<DataModelNode | null> {
     return invoke("project_data_model");
 }
 
+/** An edge in the module dependency graph (relative file paths). */
+export type DependencyEdge = { from: string; to: string };
+
+/** A require the resolver couldn't statically resolve to a module. */
+export type UnresolvedRequire = { from: string; expr: string };
+
+export type DependencyGraph = {
+    edges: DependencyEdge[];
+    unresolved: UnresolvedRequire[];
+};
+
+/** The project's module dependency graph — which module requires which. */
+export function getProjectDependencies(): Promise<DependencyGraph | null> {
+    return invoke("project_dependencies");
+}
+
 const ProjectContext = createContext<ProjectSnapshot | null>(null);
 
 /**
