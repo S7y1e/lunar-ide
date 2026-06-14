@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { confirm, message } from "@tauri-apps/plugin-dialog";
+import type { UnwatchFn } from "@tauri-apps/plugin-fs";
 import {
     FileNode,
     readDirectory,
@@ -7,6 +8,7 @@ import {
     createFolder,
     deleteEntry,
     renameEntry,
+    watchDirectory,
 } from "../../../lib/filesystem";
 import { MenuItem } from "./context-menu";
 
@@ -30,6 +32,28 @@ export function useTreeNode({ node, defaultExpanded, onChanged }: Params) {
     }, []);
 
     const reload = async () => setChildren(await readDirectory(node.path));
+
+    // Keep the explorer in sync with the disk: while a folder is expanded, watch
+    // it so external renames/creates/deletes (Argon, git, another editor) show
+    // up automatically. We only re-read this directory's listing, so expansion
+    // state of other nodes is preserved (unlike a full tree remount).
+    useEffect(() => {
+        if (!expanded || !node.isDir) return;
+        let unwatch: UnwatchFn | undefined;
+        let active = true;
+        watchDirectory(node.path, () => {
+            readDirectory(node.path).then(setChildren).catch(() => {});
+        })
+            .then((fn) => {
+                if (active) unwatch = fn;
+                else fn();
+            })
+            .catch(() => {});
+        return () => {
+            active = false;
+            unwatch?.();
+        };
+    }, [expanded, node.path]);
 
     const ensureLoaded = async () => {
         if (children.length === 0) setChildren(await readDirectory(node.path));

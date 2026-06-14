@@ -5,6 +5,8 @@ import {
     rename,
     writeTextFile,
     readTextFile,
+    watch,
+    type UnwatchFn,
 } from "@tauri-apps/plugin-fs";
 import { join, dirname } from "@tauri-apps/api/path";
 
@@ -104,3 +106,11 @@ export const walkProjectFiles = async (
 };
 
 export const readFileText = (path: string): Promise<string> => readTextFile(path);
+
+// Watch a single directory (non-recursive) and fire onChange when its entries
+// are added, removed, or renamed. Debounced so a burst of writes (e.g. Argon)
+// triggers a single reload. Returns the unwatch function.
+export const watchDirectory = (
+    path: string,
+    onChange: () => void
+): Promise<UnwatchFn> => watch(path, onChange, { delayMs: 200 });
