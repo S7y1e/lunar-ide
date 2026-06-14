@@ -20,6 +20,7 @@ import SyncPanel from "./sync/sync-panel";
 import { useSyncServer } from "./sync/use-sync-server";
 import ToolchainPanel from "./toolchain/toolchain-panel";
 import { useRokit } from "./toolchain/use-rokit";
+import DataModelPanel from "./data-model/data-model-panel";
 import TerminalView from "./terminal/terminal-view";
 import { useTerminalPanel } from "./terminal/use-terminal-panel";
 import SettingsView from "./settings/settings-view";
@@ -196,6 +197,12 @@ function EditorBody({ path }: Props) {
                                 onAdd={toolchain.add}
                                 onRemove={toolchain.remove}
                                 onSetVersion={toolchain.setVersion}
+                            />
+                        ) : currentView === "datamodel" ? (
+                            <DataModelPanel
+                                root={path}
+                                activeFile={activeFile}
+                                onOpenFile={openFile}
                             />
                         ) : (
                             <Sidebar
