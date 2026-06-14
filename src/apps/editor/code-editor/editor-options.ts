@@ -6,6 +6,7 @@ export const EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions 
     fontSize: 13,
     fontFamily: "'JetBrains Mono', monospace",
     fontLigatures: true,
+    mouseWheelZoom: true,
     lineHeight: 20,
     letterSpacing: 0,
     smoothScrolling: true,

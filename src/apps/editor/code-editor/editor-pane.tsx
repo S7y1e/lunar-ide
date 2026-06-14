@@ -12,12 +12,19 @@ import { registerAutocompleteEnd } from "./luau-lsp/autocomplete-end";
 import { readSettings } from "../../../lib/settings";
 import { MONACO_THEME, getTheme, subscribeTheme } from "../../../lib/theme";
 
+type CursorPosition = { line: number; column: number };
+
 type Props = {
     path: string | null;
     onDirtyChange: (path: string, dirty: boolean) => void;
+    onCursorChange: (pos: CursorPosition | null) => void;
 };
 
-export default function EditorPane({ path, onDirtyChange }: Props) {
+export default function EditorPane({
+    path,
+    onDirtyChange,
+    onCursorChange,
+}: Props) {
     const {
         content,
         setContent,
@@ -33,6 +40,8 @@ export default function EditorPane({ path, onDirtyChange }: Props) {
     const autocompleteEndEnabled = useRef(false);
     const onDirtyRef = useRef(onDirtyChange);
     onDirtyRef.current = onDirtyChange;
+    const onCursorRef = useRef(onCursorChange);
+    onCursorRef.current = onCursorChange;
     // The Monaco save action is registered once on mount, so it must read the
     // *current* save through a ref. Otherwise it keeps calling the save bound to
     // the first file ever opened and writes every Ctrl+S into that file.
@@ -46,6 +55,11 @@ export default function EditorPane({ path, onDirtyChange }: Props) {
         if (path) onDirtyRef.current(path, isDirty);
     }, [path, isDirty]);
 
+    // With no file open there's no cursor; clear the status bar position.
+    useEffect(() => {
+        if (!path) onCursorRef.current(null);
+    }, [path]);
+
     function handleMount(editor: monaco.editor.IStandaloneCodeEditor) {
         readSettings().then((values) => {
             autocompleteEndEnabled.current =
@@ -53,6 +67,13 @@ export default function EditorPane({ path, onDirtyChange }: Props) {
         });
 
         registerAutocompleteEnd(editor, () => autocompleteEndEnabled.current);
+
+        const reportCursor = (pos: monaco.Position | null) =>
+            onCursorRef.current(
+                pos ? { line: pos.lineNumber, column: pos.column } : null,
+            );
+        reportCursor(editor.getPosition());
+        editor.onDidChangeCursorPosition((e) => reportCursor(e.position));
 
         editor.addAction({
             id: "lunar.saveFile",
@@ -62,6 +83,24 @@ export default function EditorPane({ path, onDirtyChange }: Props) {
                 saveRef.current().catch((e) => console.error("save failed", e));
             },
         });
+
+        // VS Code-style editor zoom. mouseWheelZoom (in EDITOR_OPTIONS) already
+        // gives Ctrl+scroll; these bind the keyboard shortcuts to the same
+        // global font-zoom level so keys and wheel stay in sync.
+        const zoom = (action: string) => editor.getAction(action)?.run();
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Equal, () =>
+            zoom("editor.action.fontZoomIn"),
+        );
+        editor.addCommand(
+            monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Equal,
+            () => zoom("editor.action.fontZoomIn"),
+        );
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Minus, () =>
+            zoom("editor.action.fontZoomOut"),
+        );
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Digit0, () =>
+            zoom("editor.action.fontZoomReset"),
+        );
     }
 
     function handleChange(value: string) {
