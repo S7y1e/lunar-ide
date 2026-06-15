@@ -1,7 +1,7 @@
 {
     "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
     "productName": "Lunar",
-    "version": "1.9.0",
+    "version": "2.0.0",
     "identifier": "dev.S7y1e.lunar-ide",
     "build": {
         "frontendDist": "../dist",
@@ -28,7 +28,7 @@
     },
     "bundle": {
         "active": true,
-        "targets": "all",
+        "targets": ["nsis", "dmg", "appimage", "deb", "rpm"],
         "externalBin": [
             "binaries/luau-lsp",
             "binaries/rojo",
@@ -43,6 +43,11 @@
             "icons/icon.icns",
             "icons/icon.ico"
         ],
+        "windows": {
+            "nsis": {
+                "installMode": "perMachine"
+            }
+        },
         "android": {
             "debugApplicationIdSuffix": ".debug"
         }
