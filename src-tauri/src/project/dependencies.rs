@@ -9,6 +9,11 @@ use super::{DataModelNode, ProjectStore};
 
 const SOURCEMAP_FILE: &str = "sourcemap.json";
 const SCRIPT_EXT: [&str; 2] = [".luau", ".lua"];
+const VENDORED: [&str; 5] = ["Packages", "ServerPackages", "DevPackages", "_Index", "node_modules"];
+
+pub(super) fn is_vendored(path: &str) -> bool {
+    path.split('/').any(|seg| VENDORED.contains(&seg))
+}
 
 #[derive(Debug, Clone, Serialize)]
 pub struct DependencyEdge {
@@ -73,6 +78,9 @@ pub fn build(root: &Path, tree: &DataModelNode) -> DependencyGraph {
     let mut unresolved = Vec::new();
 
     for (file, chain) in &file_to_chain {
+        if is_vendored(file) {
+            continue;
+        }
         let content = match std::fs::read_to_string(root.join(file)) {
             Ok(c) => c,
             Err(_) => continue,

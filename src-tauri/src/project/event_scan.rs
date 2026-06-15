@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::path::Path;
 
+use super::dependencies::is_vendored;
 use super::event_ctx::{
     base_module_name, collect_bindings, instance_path, receiver_before, Ctx,
 };
@@ -63,6 +64,9 @@ pub(super) fn analyze(root: &Path, tree: &DataModelNode) -> EventGraph {
     let mut acc = Acc::default();
 
     for (file, chain) in &ctx.file_to_chain {
+        if is_vendored(file) {
+            continue;
+        }
         let content = match std::fs::read_to_string(root.join(file)) {
             Ok(c) => c,
             Err(_) => continue,
@@ -166,6 +170,15 @@ fn resolve_signal(
                 return;
             }
         }
+    }
+
+    let head = recv[0].as_str();
+    if head == "script"
+        || head == "game"
+        || ctx.services.contains(head)
+        || inst.contains_key(head)
+    {
+        return;
     }
 
     acc.unresolved.push(UnresolvedEvent {

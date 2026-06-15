@@ -21,6 +21,13 @@ pub(super) enum ChainArg {
     Str(String),
 }
 
+fn alias_chain(s: &str) -> Option<ChainArg> {
+    let rest = s.strip_prefix("@game/")?;
+    let mut segs = vec!["game".to_string()];
+    segs.extend(rest.split('/').map(str::to_string));
+    Some(ChainArg::Path(segs))
+}
+
 pub(super) fn lex(src: &str) -> Vec<Tok> {
     let b = src.as_bytes();
     let n = b.len();
@@ -109,7 +116,7 @@ pub(super) fn lex(src: &str) -> Vec<Tok> {
 
 pub(super) fn parse_chain(tokens: &[Tok], mut i: usize) -> Option<ChainArg> {
     match tokens.get(i)? {
-        Tok::Str(s) => Some(ChainArg::Str(s.clone())),
+        Tok::Str(s) => Some(alias_chain(s).unwrap_or_else(|| ChainArg::Str(s.clone()))),
         Tok::Ident(name) => {
             let mut segs = vec![name.clone()];
             i += 1;
