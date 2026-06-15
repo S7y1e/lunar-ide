@@ -81,9 +81,10 @@ async function getLatestRelease(
   repo: string
 ): Promise<{ version: string; assets: Record<string, string> }> {
   const url = `https://api.github.com/repos/${repo}/releases/latest`;
-  const res = await fetch(url, {
-    headers: { Accept: "application/vnd.github+json" },
-  });
+  const headers: Record<string, string> = { Accept: "application/vnd.github+json" };
+  const token = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(url, { headers });
   if (!res.ok) throw new Error(`Failed to fetch release for ${repo}: ${res.status}`);
   const data = await res.json();
   const version: string = (data.tag_name as string).replace(/^v/, "");
