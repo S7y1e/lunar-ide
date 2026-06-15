@@ -51,8 +51,6 @@ export default function DataModelTreeNode({
         if (isSelected) rowRef.current?.scrollIntoView({ block: "nearest" });
     }, [isSelected]);
 
-    // Clicking an instance selects it and opens its source if it has one;
-    // otherwise it expands. The chevron only ever toggles.
     const handleClick = async () => {
         onSelect(key);
         if (source) {

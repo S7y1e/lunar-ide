@@ -26,11 +26,6 @@ const copy = (text: string) =>
         console.warn("[datamodel] clipboard write failed", e),
     );
 
-/**
- * Studio-aware view of the project: the DataModel tree derived from the model's
- * sourcemap. Clicking a script opens its file; the open file is revealed and
- * selected in the tree; right-click copies the instance path or its `require`.
- */
 export default function DataModelPanel({ root, activeFile, onOpenFile }: Props) {
     const { tree, loading } = useDataModel(root);
 
@@ -38,8 +33,6 @@ export default function DataModelPanel({ root, activeFile, onOpenFile }: Props) 
     const [selected, setSelected] = useState<string | null>(null);
     const [menu, setMenu] = useState<NodeContext | null>(null);
 
-    // Seed the default expansion once per project (not on every sourcemap
-    // refetch, which would collapse what the user opened).
     const seeded = useRef(false);
     useEffect(() => {
         seeded.current = false;
@@ -52,7 +45,6 @@ export default function DataModelPanel({ root, activeFile, onOpenFile }: Props) 
         }
     }, [tree]);
 
-    // Reveal the open editor file: expand its ancestors and select it.
     useEffect(() => {
         if (!tree || !activeFile) return;
         const chain = findInstanceChain(tree, toRelative(root, activeFile));

@@ -18,11 +18,6 @@ type Props = {
 
 const baseName = (rel: string) => rel.split("/").pop() ?? rel;
 
-/**
- * Dependency view for the active module: what it requires and what requires it,
- * both clickable, plus any requires the resolver couldn't pin down. A query on
- * the dependency graph the model owns — the seed of event topography.
- */
 export default function DependenciesPanel({ root, activeFile, onOpenFile }: Props) {
     const { graph, loading, refresh } = useDependencies(root);
     const rel = activeFile ? toRelative(root, activeFile) : null;
@@ -97,7 +92,7 @@ export default function DependenciesPanel({ root, activeFile, onOpenFile }: Prop
                                     <div
                                         key={`${u.expr}-${i}`}
                                         className={styles.unresolved}
-                                        title="Couldn't resolve this require statically"
+                                        title={u.expr}
                                     >
                                         {u.expr}
                                     </div>

@@ -199,9 +199,6 @@ const rokitManifest = (opts: NewProjectOptions): string => {
     return `[tools]\n${lines.join("\n")}\n`;
 };
 
-// Lunar's own project manifest — the `.csproj`-style file the IDE configures
-// itself from. Kept minimal for now: which sync backend and which Rojo project
-// defines the DataModel.
 const lunarManifest = (): string =>
     `[sync]\n` +
     `backend = "rojo"\n\n` +

@@ -17,7 +17,6 @@ import {
 
 export type ClassIcon = { Icon: IconType; color: string };
 
-// Specific classes worth their own glyph. Everything else falls back by suffix.
 const BY_CLASS: Record<string, IconType> = {
     DataModel: VscGlobe,
     Workspace: VscServer,
@@ -47,8 +46,6 @@ function glyph(className: string): IconType {
     return VscSymbolNamespace;
 }
 
-// Theme-aware accents (resolve per Nord/Dracula). Kept few and meaningful, like
-// JetBrains icon coloring: scripts pop, folders stay neutral.
 function tint(className: string): string {
     switch (className) {
         case "DataModel":
@@ -69,7 +66,6 @@ function tint(className: string): string {
     return "var(--accent)";
 }
 
-/** Icon + theme-aware color for a DataModel instance, keyed off its class. */
 export function iconForClass(className: string): ClassIcon {
     return { Icon: glyph(className), color: tint(className) };
 }

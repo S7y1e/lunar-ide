@@ -21,11 +21,6 @@ export function buildConfigRoot(values: SettingsValues): ConfigNode {
         setDeep(root, setting.key, value);
     }
 
-    // Lunar owns sourcemap generation (see the `use-sourcemap` hook): it runs
-    // its own `rojo sourcemap --watch`. Force luau-lsp to never spawn its own
-    // generator, which would race ours writing the same file. It still reads the
-    // on-disk sourcemap.json we keep fresh. luau-lsp defaults this to true, so we
-    // must send false explicitly.
     setDeep(root, "luau-lsp.sourcemap.autogenerate", false);
 
     return root;

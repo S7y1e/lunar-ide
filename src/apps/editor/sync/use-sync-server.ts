@@ -84,8 +84,6 @@ export function useSyncServer(rootPath: string) {
         setPort(DEFAULT_PORT[next]);
     };
 
-    // Adopt the backend the project's manifest pins, once the model reports it.
-    // Only while stopped, so a running server (or a user override) is left be.
     const manifestBackend = project?.syncBackend;
     useEffect(() => {
         if (manifestBackend !== "rojo" && manifestBackend !== "argon") return;
@@ -102,10 +100,6 @@ export function useSyncServer(rootPath: string) {
         try {
             if (backend === "argon") {
                 await applyArgonConfig(rootPath, append);
-                // Lunar owns the sourcemap end to end (a dedicated
-                // `argon sourcemap --watch`, see use-sourcemap), so the serve
-                // process must not also generate it — two writers race on the
-                // same file. Turn off argon's serve-side sourcemap.
                 append("Lunar owns the sourcemap; disabling argon serve with_sourcemap.");
                 await runArgonConfig("with_sourcemap", "false", rootPath);
             }

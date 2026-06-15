@@ -22,6 +22,7 @@ import ToolchainPanel from "./toolchain/toolchain-panel";
 import { useRokit } from "./toolchain/use-rokit";
 import DataModelPanel from "./data-model/data-model-panel";
 import DependenciesPanel from "./dependencies/dependencies-panel";
+import EventsPanel from "./events/events-panel";
 import TerminalView from "./terminal/terminal-view";
 import { useTerminalPanel } from "./terminal/use-terminal-panel";
 import SettingsView from "./settings/settings-view";
@@ -211,6 +212,8 @@ function EditorBody({ path }: Props) {
                                 activeFile={activeFile}
                                 onOpenFile={openFile}
                             />
+                        ) : currentView === "events" ? (
+                            <EventsPanel root={path} onOpenFile={openFile} />
                         ) : (
                             <Sidebar
                                 currentView={currentView}

@@ -1,0 +1,187 @@
+@use "../styles/vars" as *;
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    background: $panel;
+    height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    height: 32px;
+    padding: 0 6px 0 10px;
+    border-bottom: 1px solid $divider;
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: $muted;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.headerBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: $icon;
+    cursor: pointer;
+
+    &:hover {
+        background: $hover;
+        color: #fff;
+    }
+}
+
+.body {
+    flex: 1;
+    overflow: auto;
+    padding: 2px 0;
+}
+
+// One signal's flow row: firers | → | signal | → | listeners.
+.flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid $divider;
+}
+
+.firers,
+.listeners {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.firers {
+    align-items: flex-end;
+}
+
+.listeners {
+    align-items: flex-start;
+}
+
+.arrow {
+    flex-shrink: 0;
+    color: $muted;
+}
+
+.signalNode {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 190px;
+    padding: 4px 9px;
+    background: $deep;
+    border: 1px solid;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.signalLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: $text;
+}
+
+.signalKind {
+    flex-shrink: 0;
+    color: $muted;
+    font-size: 10px;
+}
+
+.fileBox {
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 2px 8px;
+    background: $bar;
+    border: 1px solid $divider;
+    border-radius: 4px;
+    color: $text;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+
+    &:hover {
+        background: $hover;
+    }
+}
+
+.none {
+    color: $muted;
+    font-size: 11px;
+    font-style: italic;
+}
+
+.section {
+    padding: 8px 12px 4px;
+    color: $muted;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    user-select: none;
+}
+
+.unresolved {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 3px 12px;
+    background: transparent;
+    border: none;
+    color: $muted;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+        background: $hover;
+    }
+}
+
+.unresolvedArrow {
+    flex-shrink: 0;
+    font-size: 9px;
+}
+
+.unresolvedFrom {
+    margin-left: auto;
+    padding-left: 8px;
+    flex-shrink: 0;
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.empty {
+    padding: 12px 14px;
+    color: $muted;
+    font-size: 12px;
+    line-height: 1.5;
+}

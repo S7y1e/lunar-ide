@@ -8,12 +8,10 @@ import {
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
-/** Immutable view of the backend Project Model. Mirrors `ProjectSnapshot` in Rust. */
 export type ProjectSnapshot = {
     root: string;
     name: string;
     projectFile: string;
-    /** Sync backend pinned by lunar.toml, or null to use the frontend default. */
     syncBackend: string | null;
 };
 
@@ -29,7 +27,6 @@ export function getProjectSnapshot(): Promise<ProjectSnapshot | null> {
     return invoke("project_snapshot");
 }
 
-/** A node in the project's DataModel tree. Mirrors `DataModelNode` in Rust. */
 export type DataModelNode = {
     name: string;
     className: string;
@@ -37,19 +34,11 @@ export type DataModelNode = {
     children: DataModelNode[];
 };
 
-/**
- * The parsed DataModel tree for the open project, or `null` when none is open or
- * no sourcemap has been generated yet. The Project Model owns the parse; this is
- * the query surface later phases (e.g. the Studio-aware tree) build on.
- */
 export function getProjectDataModel(): Promise<DataModelNode | null> {
     return invoke("project_data_model");
 }
 
-/** An edge in the module dependency graph (relative file paths). */
 export type DependencyEdge = { from: string; to: string };
-
-/** A require the resolver couldn't statically resolve to a module. */
 export type UnresolvedRequire = { from: string; expr: string };
 
 export type DependencyGraph = {
@@ -57,22 +46,31 @@ export type DependencyGraph = {
     unresolved: UnresolvedRequire[];
 };
 
-/** The project's module dependency graph — which module requires which. */
 export function getProjectDependencies(): Promise<DependencyGraph | null> {
     return invoke("project_dependencies");
 }
 
+export type Signal = {
+    id: string;
+    label: string;
+    kind: string;
+    firedBy: string[];
+    connectedBy: string[];
+};
+
+export type UnresolvedEvent = { from: string; expr: string; action: string };
+
+export type EventGraph = {
+    signals: Signal[];
+    unresolved: UnresolvedEvent[];
+};
+
+export function getProjectEvents(): Promise<EventGraph | null> {
+    return invoke("project_events");
+}
+
 const ProjectContext = createContext<ProjectSnapshot | null>(null);
 
-/**
- * Opens `root` as the active project in the backend for the lifetime of the
- * subtree, and exposes the resulting snapshot via {@link useProject}. Switching
- * projects (a new `root`) closes the old one and opens the new; unmounting
- * (returning home) closes it.
- *
- * The `path` prop threaded through the editor still works — this provider is
- * additive, so consumers can migrate to `useProject()` opportunistically.
- */
 export function ProjectProvider({
     root,
     children,
@@ -90,8 +88,6 @@ export function ProjectProvider({
             if (active) setSnapshot(snap);
         });
 
-        // Later phases (sourcemap, manifest) mutate the model in place and emit
-        // `project://changed`; refetch the snapshot so the UI stays in sync.
         listen("project://changed", () => {
             getProjectSnapshot().then((snap) => {
                 if (active && snap) setSnapshot(snap);
@@ -112,7 +108,6 @@ export function ProjectProvider({
     );
 }
 
-/** The active project snapshot, or `null` until the backend has opened it. */
 export function useProject(): ProjectSnapshot | null {
     return useContext(ProjectContext);
 }

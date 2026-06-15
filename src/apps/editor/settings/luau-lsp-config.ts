@@ -80,10 +80,6 @@ export const LUAU_SETTINGS: LuauSetting[] = [
         default: true,
         description: "Whether Rojo sourcemap parsing is enabled.",
     },
-    // `luau-lsp.sourcemap.autogenerate` is intentionally not exposed: Lunar owns
-    // sourcemap generation (see the `use-sourcemap` hook) and forces it to false
-    // in the config sent to luau-lsp (see luau-lsp/config.ts) so the two don't
-    // race writing the same file.
     {
         key: "luau-lsp.sourcemap.rojoPath",
         type: "string",

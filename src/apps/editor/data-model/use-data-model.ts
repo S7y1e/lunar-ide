@@ -2,14 +2,6 @@ import { useEffect, useState } from "react";
 import { watch, type UnwatchFn } from "@tauri-apps/plugin-fs";
 import { getProjectDataModel, type DataModelNode } from "../../../lib/project";
 
-/**
- * The project's DataModel tree, kept in sync with the on-disk sourcemap.
- *
- * The Rust model owns the parse (`project_data_model`); this hook just knows
- * *when* to re-ask — it watches the project root for `sourcemap.json` writes
- * (our generator rewrites it on file changes) and refetches. Same split as the
- * sourcemap generator: Rust parses, the frontend reacts.
- */
 export function useDataModel(rootPath: string) {
     const [tree, setTree] = useState<DataModelNode | null>(null);
     const [loading, setLoading] = useState(true);

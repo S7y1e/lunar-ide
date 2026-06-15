@@ -41,9 +41,6 @@ export function useLuauLsp(rootPath: string) {
             ]);
             if (stopped) return;
             currentValues = values;
-            // Layer the model's manifest over global settings: the project file
-            // is owned by lunar.toml, so luau-lsp resolves requires against the
-            // same DataModel our sourcemap generator targets.
             const projectFile = snapshot?.projectFile;
             const getConfig = () =>
                 buildConfigRoot(
